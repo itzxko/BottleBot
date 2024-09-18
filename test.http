@@ -1,0 +1,29 @@
+### ? test route for setting jwt with username
+GET http://localhost:8080/api/user/login/jiwo
+
+### ? test route for getting jwt with username
+GET http://localhost:8080/api/user/username
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imppd28iLCJpYXQiOjE3MjY1ODc0NTIsImV4cCI6MTcyNjU5MTA1Mn0.qNc_b-9hGmEjZXbhxflF5YW1DAn4GcyL3o2zUubBRJE
+
+### ? test route for jwt inner route
+GET http://localhost:8080/api/user/inner
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXJAZXhhbXBsZS5jb20iLCJpYXQiOjE3MjY1OTEzMDEsImV4cCI6MTcyNjU5NDkwMX0._Qdr6FMnKPM4m65tHVWiAdMoK0nRPWLqT5_LkpA90OM
+
+
+### * test route for register
+POST http://localhost:8080/api/user/register
+Content-Type: application/json
+
+{
+  "email": "user1@example.com",
+  "password": "yourpassword1"
+}
+
+### * test route for login
+POST http://localhost:8080/api/user/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "yourpassword"
+}
