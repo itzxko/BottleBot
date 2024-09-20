@@ -1,4 +1,4 @@
-import { verifyToken } from "../controllers/userController.js";
+import { verifyToken } from "../controllers/authController.js";
 
 // * authenticate using JWT
 const authenticateJWT = (req, res, next) => {

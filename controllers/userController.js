@@ -1,32 +1,13 @@
-import jwt from "jsonwebtoken";
 import { userModel } from "../models/userModel.js";
-
-// * generate JWT
-const generateToken = (username) => {
-  const payload = { username };
-  const token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "1h",
-  }); // * token expires in 1 hour
-  return token;
-};
-
-// * verify JWT
-const verifyToken = (token) => {
-  try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    return decoded;
-  } catch (err) {
-    return null; // * Invalid token
-  }
-};
+import { createResponse } from "../utils/response.js";
 
 // * check if email is a duplicate
-const isEmailAlreadyInUsed = async (newUser) => {
+const isEmailAlreadyInUsed = async (credentials, userId) => {
   try {
     return await userModel.findOne({
-      email: newUser.email,
+      "credentials.email": credentials.email,
       _id: {
-        $ne: newUser._id,
+        $ne: userId, // * checks that the ID does not match if provided
       },
     });
   } catch (err) {
@@ -35,39 +16,120 @@ const isEmailAlreadyInUsed = async (newUser) => {
   }
 };
 
-// * check if the user is present in the database
-const validateUser = async (user) => {
+// * check if name is a duplicate
+const isNameAlreadyExists = async (personalInfo, userId) => {
   try {
-    return await userModel.findOne(user);
+    return await userModel.findOne({
+      "personalInfo.firstName": personalInfo.firstName,
+      "personalInfo.middleName": personalInfo.middleName,
+      "personalInfo.lastName": personalInfo.lastName,
+      _id: {
+        $ne: userId, // * checks that the ID does not match if provided
+      },
+    });
   } catch (err) {
-    console.error("ERROR AUTHENTICATING USER");
+    console.error("Error checking if email exists", err);
+    throw err;
+  }
+};
+
+// * check if number is a duplicate
+const isNumberAlreadyInUsed = async (contactInfo, userId) => {
+  try {
+    return await userModel.findOne({
+      // * check if any number is in the array
+      "contactInfo.phoneNumbers": { $in: contactInfo.phoneNumbers },
+      _id: {
+        $ne: userId, // * checks that the ID does not match if provided
+      },
+    });
+  } catch (err) {
+    console.error("Error checking if email exists", err);
+    throw err;
+  }
+};
+
+// * retrieve all
+const getAll = async (req, res) => {
+  const response = createResponse();
+  try {
+    let users = await userModel.find({});
+    response.message = "All users retrieved successfully!";
+    response.success = true;
+    response.users = users;
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
+  }
+};
+
+// * retrieve one
+const getOne = async (req, res) => {
+  const response = createResponse();
+  try {
+    const _id = req.params.id;
+    let user = await userModel.findOne({ _id: _id });
+    response.message = "User retrieved successfully!";
+    response.success = true;
+    response.user = user;
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
   }
 };
 
 // * register
 const register = async (req, res) => {
+  const response = createResponse();
+
   try {
-    const newUser = req.body;
+    // * destructure for easier access
+    const { personalInfo, contactInfo, economicInfo, credentials } = req.body;
 
     // * validate the req body first before anything
-    if (!newUser.email || !newUser.password) {
-      res.status(400).json({ message: "Missing required fields!" });
-      return;
+    if (
+      !personalInfo.firstName ||
+      !personalInfo.middleName ||
+      !personalInfo.lastName ||
+      !personalInfo.dateOfBirth ||
+      !personalInfo.gender ||
+      !personalInfo.civilStatus ||
+      !personalInfo.nationality ||
+      !credentials.email ||
+      !credentials.password ||
+      !contactInfo.address ||
+      !contactInfo.phoneNumbers ||
+      !economicInfo.employmentStatus ||
+      !economicInfo.occupation
+    ) {
+      response.message = "Missing required fields!";
+      return res.status(400).json(response);
     }
 
     // * checking for duplicate
-    // let isNameExists = await isUserAlreadyExists(newUser);
+    let isNameExists = await isNameAlreadyExists(personalInfo);
 
-    // if (isNameExists) {
-    //   res.json({ message: "Name is already registered" });
-    //   return;
-    // }
+    if (isNameExists) {
+      response.message = "This name is already registered";
+      return res.json(response);
+    }
 
-    let isEmailExists = await isEmailAlreadyInUsed(newUser);
+    let isNumberExists = await isNumberAlreadyInUsed(contactInfo);
+
+    if (isNumberExists) {
+      response.message = "This number is already registered";
+      return res.json(response);
+    }
+
+    let isEmailExists = await isEmailAlreadyInUsed(credentials);
 
     if (isEmailExists) {
-      res.json({ message: "Email is already in used" });
-      return;
+      response.message = "Email is already in used";
+      return res.json(response);
     }
 
     // * getting next id from the collection
@@ -75,94 +137,110 @@ const register = async (req, res) => {
 
     // * adding a new user in the User collection
     await userModel.create({
+      personalInfo,
+      contactInfo,
+      economicInfo,
+      credentials,
       // _id: ++next._id,
-      // firstName: req.body.firstName,
-      // lastName: req.body.lastName,
-      email: req.body.email,
-      password: req.body.password,
-      // level: "user",
     });
 
-    res.json({ message: "Successfuly registered!" });
-  } catch (err) {
-    console.error("ERROR : ", err);
-    res.status(500).json({ message: "Internal server error" });
+    response.message = "Successfuly registered!";
+    response.success = true;
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
   }
 };
 
-// * login
-const login = async (req, res) => {
+// * update
+const update = async (req, res) => {
+  const response = createResponse();
   try {
-    const user = req.body;
+    // * destructure for easier access
+    const { personalInfo, contactInfo, economicInfo, credentials } = req.body;
+    const _id = req.params.id;
 
     // * validate the req body first before anything
-    if (!user.email || !user.password) {
-      res.status(400).json({ message: "Missing required fields!" });
-      return;
+    if (
+      !_id ||
+      !personalInfo.firstName ||
+      !personalInfo.middleName ||
+      !personalInfo.lastName ||
+      !personalInfo.dateOfBirth ||
+      !personalInfo.gender ||
+      !personalInfo.civilStatus ||
+      !personalInfo.nationality ||
+      !credentials.email ||
+      !credentials.password ||
+      !contactInfo.address ||
+      !contactInfo.phoneNumbers ||
+      !economicInfo.employmentStatus ||
+      !economicInfo.occupation
+    ) {
+      response.message = "Missing required fields!";
+      return res.status(400).json(response);
     }
 
-    const userFromDatabase = await validateUser(user);
-    if (!userFromDatabase) {
-      res.json({ message: "Incorrect email or password" });
-      return;
+    // * checking for duplicate
+    let isNameExists = await isNameAlreadyExists(personalInfo, _id);
+
+    if (isNameExists) {
+      response.message = "This name is already registered";
+      return res.json(response);
     }
 
-    const token = generateToken(user.email);
+    let isNumberExists = await isNumberAlreadyInUsed(contactInfo, _id);
 
-    res.json({
-      message: "Login success!",
-      user: userFromDatabase, // ? test
-      token: token, // ? test
+    if (isNumberExists) {
+      response.message = "This number is already registered";
+      return res.json(response);
+    }
+
+    let isEmailExists = await isEmailAlreadyInUsed(credentials, _id);
+
+    if (isEmailExists) {
+      response.message = "Email is already in used";
+      return res.json(response);
+    }
+
+    await userModel.findByIdAndUpdate(_id, {
+      personalInfo,
+      contactInfo,
+      economicInfo,
+      credentials,
     });
-  } catch (err) {
-    console.error(err);
+
+    response.message = "User successfuly updated!";
+    response.success = true;
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
   }
 };
 
-// ! TO BE DELETED
-// ? FF FUNCS ARE FOR TESTING THE JWT ONLY
-// ? test func for setting jwt username
-// ? generate a token
-const setJWTUsername = (req, res) => {
-  const { username } = req.params;
-  const token = generateToken(username);
-  res.json({ token });
-};
-
-// ? test func for getting jwt username
-// ? get username from token
-const getJWTUsername = (req, res) => {
-  const { username } = req.user;
-  if (username) {
-    res.json({ username });
-  } else {
-    res.status(400).json({ message: "Could not retrieve username" });
+// * remove
+const remove = async (req, res) => {
+  const response = createResponse();
+  try {
+    const _id = req.params.id;
+    const deletedUser = await userModel.findByIdAndDelete(_id);
+    if (deletedUser) {
+      response.message = "User successfuly deleted!";
+      response.success = true;
+    } else {
+      response.message = "User does not exists!";
+      response.success = false;
+    }
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
   }
 };
 
-// ? test func to access inner route after login
-const innerRoute = (req, res) => {
-  res.json({ message: "INNER ROUTE", username: req.user.username });
-};
-
-// ! TO BE DELETED, NOT NEEDED
-// Function to set username using token
-// const setUsernameFromToken = (token) => {
-//   const decoded = verifyToken(token);
-//   console.log("Decoded:", decoded); // Debugging
-//   if (decoded) {
-//     console.log("Decoded Username:", decoded.username); // Debugging
-//     return decoded.username;
-//   } else {
-//     return null; // Invalid token
-//   }
-// };
-
-export {
-  verifyToken,
-  setJWTUsername,
-  getJWTUsername,
-  register,
-  login,
-  innerRoute,
-};
+export { register, update, remove, getAll, getOne };

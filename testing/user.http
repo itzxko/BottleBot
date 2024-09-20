@@ -1,0 +1,79 @@
+# ! FOR SUCCESSFUL TESTING, IF PORT HAS BEEN CHANGED, 
+# ! MAKE SURE TO MODIFY PORTS ON OTHER TESTING FILE
+@port = 8080
+@baseUrl = http://localhost:{{port}}/api
+
+### * test route to get all users
+GET {{baseUrl}}/users/
+
+### * test route to get one user
+GET {{baseUrl}}/users/66ed7df69271160de05cbd59
+
+### * test route for register
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "personalInfo": {
+    "firstName": "Jiwo",
+    "middleName": "G",
+    "lastName": "Mendador",
+    "dateOfBirth": "1990-01-01",
+    "gender": "Male",
+    "civilStatus": "Single",
+    "nationality": "Filipino"
+  },
+  "contactInfo": {
+    "address": {
+      "houseNumber": "123",
+      "street": "Main St",
+      "barangay": "Barangay 1",
+      "city": "City Name"
+    },
+    "phoneNumbers": ["09123456789"]
+  },
+  "economicInfo": {
+    "employmentStatus": "Employed",
+    "occupation": "Engineer"
+  },
+  "credentials": {
+    "email": "user3@example.com",
+    "password": "yourpassword3"
+  }
+}
+
+### * test route for updating user
+PUT {{baseUrl}}/users/66ed98183aa56d8e612b2097
+Content-Type: application/json
+
+{
+  "personalInfo": {
+    "firstName": "John",
+    "middleName": "Doe",
+    "lastName": "Smith",
+    "dateOfBirth": "1990-01-01",
+    "gender": "Male",
+    "civilStatus": "Single",
+    "nationality": "Filipino"
+  },
+  "contactInfo": {
+    "address": {
+      "houseNumber": "123",
+      "street": "Main St",
+      "barangay": "Barangay 1",
+      "city": "City Name"
+    },
+    "phoneNumbers": ["09123456798"]
+  },
+  "economicInfo": {
+    "employmentStatus": "Employed",
+    "occupation": "Engineer"
+  },
+  "credentials": {
+    "email": "user@example.com",
+    "password": "yourpassword"
+  }
+}
+
+### * test route for deleting user
+DELETE {{baseUrl}}/users/66ed7c143ba05dc02fcb1163
