@@ -1,21 +1,21 @@
 import express from "express";
-import { register, update, remove, getOne, getAll } from "../controllers/userController.js";
+import { registerUser, updateUser, removeUser, getOneUser, getAllUsers } from "../controllers/userController.js";
 
 const userRoutes = express.Router();
 
 // * get all
-userRoutes.get("/", getAll);
+userRoutes.get("/", getAllUsers);
 
 // * get one
-userRoutes.get("/:id", getOne);
+userRoutes.get("/:id", getOneUser);
 
 // * add
-userRoutes.post("/register", register);
+userRoutes.post("/register", registerUser);
 
 // * update
-userRoutes.put("/:id", update);
+userRoutes.put("/:id", updateUser);
 
 // * delete
-userRoutes.delete("/:id", remove);
+userRoutes.delete("/:id", removeUser);
 
 export default userRoutes;

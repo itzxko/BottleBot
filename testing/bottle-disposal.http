@@ -1,0 +1,30 @@
+# ! FOR SUCCESSFUL TESTING, IF PORT HAS BEEN CHANGED, 
+# ! MAKE SURE TO MODIFY PORTS ON OTHER TESTING FILE
+@port = 8080
+@baseUrl = http://localhost:{{port}}/api
+
+### * test route 1 for adding bottle disposal history
+POST {{baseUrl}}/history/dispose
+Content-Type: application/json
+
+{
+  "userId": "66eda9be5bd1b94d69bddfcc",
+  "bottleCount": 10,
+  "pointsAccumulated": 10
+}
+
+### * test route 1 for adding bottle disposal history
+POST {{baseUrl}}/history/dispose
+Content-Type: application/json
+
+{
+  "userId": "66ed98453aa56d8e612b209b",
+  "bottleCount": 5,
+  "pointsAccumulated": 5
+}
+
+### * test route for getting all users disposal history
+GET {{baseUrl}}/history/dispose
+
+### * test route for getting one user disposal history
+GET {{baseUrl}}/history/dispose/66ed98453aa56d8e612b209b

@@ -1,14 +1,13 @@
 import multer from "multer";
 import express from "express";
-import { add } from "../controllers/rewardController.js";
+import { addReward, getAllRewards, getOneReward, updateReward, removeReward } from "../controllers/rewardController.js";
 
 const rewardRoutes = express.Router();
 
 // * setup multer for uploading images
-console.log("MULTER CALLED");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // * ensure "uploads" directory exists
+    cb(null, "uploads"); // * ensure "uploads" directory exists
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now();
@@ -35,6 +34,18 @@ const upload = multer({
 
 // ! file uploaded using REST client becomes corrupted
 // ? test on actual frontend input
-rewardRoutes.post("/", upload.single("image"), add);
+rewardRoutes.post("/", upload.single("image"), addReward);
+
+// * update reward
+rewardRoutes.post("/:id", upload.single("image"), updateReward);
+
+// * remove reward
+rewardRoutes.delete("/:id", upload.single("image"), removeReward);
+
+// * get all rewards
+rewardRoutes.get("/", getAllRewards);
+
+// * get one reward
+rewardRoutes.get("/:id", getOneReward);
 
 export { rewardRoutes };

@@ -2,18 +2,6 @@
 @baseUrl = http://localhost:{{port}}/api
 
 ### * test route for adding reward
-# POST {{baseUrl}}/rewards/
-# Content-Type: multipart/form-data; boundary=MyBoundary
-
-# --form
-# rewardName="Reward 1"
-# rewardDescription="this is reward 1"
-# image=@./sample_images_to_upload/catu.jpg
-# pointsRequired="50"
-# stocks="10"
-# category="Goods"
-
-### * test route for adding rewardPOST {{baseUrl}}/rewards/
 POST {{baseUrl}}/rewards/
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 

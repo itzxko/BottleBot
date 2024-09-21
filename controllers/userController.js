@@ -50,7 +50,7 @@ const isNumberAlreadyInUsed = async (contactInfo, userId) => {
 };
 
 // * retrieve all
-const getAll = async (req, res) => {
+const getAllUsers = async (req, res) => {
   const response = createResponse();
   try {
     let users = await userModel.find({});
@@ -66,7 +66,7 @@ const getAll = async (req, res) => {
 };
 
 // * retrieve one
-const getOne = async (req, res) => {
+const getOneUser = async (req, res) => {
   const response = createResponse();
   try {
     const _id = req.params.id;
@@ -83,7 +83,7 @@ const getOne = async (req, res) => {
 };
 
 // * register
-const register = async (req, res) => {
+const registerUser = async (req, res) => {
   const response = createResponse();
 
   try {
@@ -155,7 +155,7 @@ const register = async (req, res) => {
 };
 
 // * update
-const update = async (req, res) => {
+const updateUser = async (req, res) => {
   const response = createResponse();
   try {
     // * destructure for easier access
@@ -223,7 +223,7 @@ const update = async (req, res) => {
 };
 
 // * remove
-const remove = async (req, res) => {
+const removeUser = async (req, res) => {
   const response = createResponse();
   try {
     const _id = req.params.id;
@@ -243,4 +243,4 @@ const remove = async (req, res) => {
   }
 };
 
-export { register, update, remove, getAll, getOne };
+export { registerUser, updateUser, removeUser, getAllUsers, getOneUser };

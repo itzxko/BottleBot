@@ -1,0 +1,30 @@
+# ! FOR SUCCESSFUL TESTING, IF PORT HAS BEEN CHANGED, 
+# ! MAKE SURE TO MODIFY PORTS ON OTHER TESTING FILE
+@port = 8080
+@baseUrl = http://localhost:{{port}}/api
+
+### * test route 1 for adding rewards claimed history
+POST {{baseUrl}}/history/claim
+Content-Type: application/json
+
+{
+  "userId": "66eda9be5bd1b94d69bddfcc",
+  "rewardId": "66eefacb3479f08d051566f6",
+  "pointsSpent": 1
+}
+
+### * test route 2 for adding rewards claimed history
+POST {{baseUrl}}/history/claim
+Content-Type: application/json
+
+{
+  "userId": "66ed98453aa56d8e612b209b",
+  "rewardId": "66eefacb3479f08d051566f6",
+  "pointsSpent": 1
+}
+
+### * test route for getting all users reward claim history
+GET {{baseUrl}}/history/claim
+
+### * test route for getting one user reward claim history
+GET {{baseUrl}}/history/claim/66ed98453aa56d8e612b209b

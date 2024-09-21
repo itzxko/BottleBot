@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { tryMongoDBAtlasConnection } from "./config/database.js";
 import { rewardRoutes } from "./routes/rewardRoutes.js";
+import historyRoutes from "./routes/historyRoutes.js";
 
 let app = express();
 app.listen(8080);
@@ -13,18 +14,15 @@ app.listen(8080);
 dotenv.config();
 app.use(express.json());
 
-// ! this can cause issue when uploading a file and idk why :)
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 
-console.log("SERVER CALLED");
-
-// * dir for images
-app.use("/images", express.static("uploads"));
-
 // * trying to connect on database using mongoose
 tryMongoDBAtlasConnection();
+
+// * dir for images
+app.use("/api/images", express.static("uploads"));
 
 // * use the user routes
 app.use("/api/users", userRoutes);
@@ -34,6 +32,9 @@ app.use("/api/auth", authRoutes);
 
 // * use reward routes for reward related requests
 app.use("/api/rewards", rewardRoutes);
+
+// * history routes for rewards claimed and bottle disposed
+app.use("/api/history", historyRoutes);
 
 // * start server
 app.get("/", (req, res) => {
