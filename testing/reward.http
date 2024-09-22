@@ -31,3 +31,6 @@ Content-Type: image/jpeg
 
 <binary file content here> 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### * test route for sorting rewards by category
+GET {{baseUrl}}/rewards?category=Beverage

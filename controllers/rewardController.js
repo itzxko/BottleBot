@@ -158,8 +158,18 @@ const updateRewardStocks = async (updatedStocks, _id) => {
 const getAllRewards = async (req, res) => {
   const response = createResponse();
   try {
-    let rewards = await rewardModel.find({});
-    response.message = "All rewards retrieved successfully!";
+    // * for searching/filtering, check if the 'category' exists
+    const { category } = req.query;
+    // * create filter obj dynamically based on the category
+    let filter = {};
+    if (category) {
+      filter.category = category;
+    }
+
+    let rewards = await rewardModel.find(filter);
+    response.message = category
+      ? `Rewards in category '${category}' retrieved successfully!`
+      : "All rewards retrieved successfully!";
     response.success = true;
     response.rewards = rewards;
     return res.json(response);
