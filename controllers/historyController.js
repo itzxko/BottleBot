@@ -2,11 +2,18 @@ import mongoose from "mongoose";
 import { bottleDisposalModel } from "../models/bottleDisposalModel.js";
 import { rewardClaimModel } from "../models/rewardClaimModel.js";
 import { createResponse } from "../utils/response.js";
-import { getPointsRequiredForReward } from "./rewardController.js";
+import {
+  getPointsRequiredForReward,
+  getStockAvailableForReward,
+  updateRewardStocks,
+} from "./rewardController.js";
+
+// TODO: include validation if the user exists
+// TODO: include stock checking before claiming reward
 
 // * BOTTLE DISPOSAL HISTORY
 
-// * calculate total bottle count by the user
+// * calculate total bottle count of user
 const getUserBottleDisposalCount = async (userId) => {
   try {
     // * calculate total count of disposed bottles by the user
@@ -51,8 +58,10 @@ const getAllUsersDisposedBottleHistory = async (req, res) => {
 const getOneUserDisposedBottleHistory = async (req, res) => {
   const response = createResponse();
   try {
-    const _id = req.params.id;
-    let userdisposalhistory = await bottleDisposalModel.findOne({ userId: _id });
+    const userid = req.params.userId;
+    let userdisposalhistory = await bottleDisposalModel.find({
+      userId: userid,
+    });
     response.message = "user disposal record retrieved successfully!";
     response.success = true;
     response.userdisposalhistory = userdisposalhistory;
@@ -95,6 +104,86 @@ const disposeBottle = async (req, res) => {
     return res.json(response);
   } catch (error) {
     console.error("ERROR:", err);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
+  }
+};
+
+// * update disposal record
+const updateDisposedBottle = async (req, res) => {
+  const response = createResponse();
+  try {
+    // * destructure for easier access
+    const { userId, bottleCount, pointsAccumulated } = req.body;
+    const _id = req.params.id;
+
+    console.log("req detected");
+
+    // * validate the req body first before anything
+    if (!_id || !userId || !bottleCount || !pointsAccumulated) {
+      response.message = "Missing required fields!";
+      return res.status(400).json(response);
+    }
+
+    // * updating a disposed bottle record in the disposal collection
+    await bottleDisposalModel.findByIdAndUpdate(_id, {
+      userId,
+      bottleCount,
+      pointsAccumulated,
+    });
+
+    response.message = "Disposed bottle record successfuly updated!";
+    response.success = true;
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
+  }
+};
+
+// * delete one disposal record
+const removeDisposedBottle = async (req, res) => {
+  const response = createResponse();
+  try {
+    const _id = req.params.id;
+    const deletedDisposedBottle = await bottleDisposalModel.findByIdAndDelete(
+      _id
+    );
+    if (deletedDisposedBottle) {
+      response.message = "Disposed bottle record successfuly deleted!";
+      response.success = true;
+    } else {
+      response.message = "Disposed bottle record does not exists!";
+      response.success = false;
+    }
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
+  }
+};
+
+// * delete disposal history per user
+const removeUserDisposedBottle = async (req, res) => {
+  const response = createResponse();
+  try {
+    const userId = req.params.userId;
+    const deletedDisposedBottles = await bottleDisposalModel.deleteMany({
+      userId: userId,
+    });
+    if (deletedDisposedBottles.deletedCount > 0) {
+      response.message =
+        "All disposed bottle records for the user have been successfully deleted!";
+      response.success = true;
+    } else {
+      response.message = "No disposed bottle records found for the user!";
+      response.success = false;
+    }
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
     response.message = "Internal server error";
     return res.status(500).json(response);
   }
@@ -167,19 +256,21 @@ const getAllUsersRewardClaimHistory = async (req, res) => {
 
 // * get one reward claim record
 const getOneUserRewardClaimHistory = async (req, res) => {
-   const response = createResponse();
-   try {
-     const _id = req.params.id;
-     let userrewardclaimhistory = await rewardClaimModel.findOne({ userId: _id });
-     response.message = "user reward claim record retrieved successfully!";
-     response.success = true;
-     response.userrewardclaimhistory = userrewardclaimhistory;
-     return res.json(response);
-   } catch (error) {
-     console.error("ERROR : ", error);
-     response.message = "Internal server error";
-     return res.status(500).json(response);
-   }
+  const response = createResponse();
+  try {
+    const userId = req.params.userId;
+    let userrewardclaimhistory = await rewardClaimModel.find({
+      userId: userId,
+    });
+    response.message = "user reward claim record retrieved successfully!";
+    response.success = true;
+    response.userrewardclaimhistory = userrewardclaimhistory;
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
+  }
 };
 
 // * add a new reward claim record
@@ -187,41 +278,127 @@ const claimReward = async (req, res) => {
   const response = createResponse();
   try {
     // * destructure for easier access
-    const { userId, rewardId, pointsSpent } = req.body;
+    const { userId, rewardId /*, pointsSpent*/ } = req.body;
 
     // * validate the req body first before anything
-    if (!userId || !rewardId || !pointsSpent) {
+    if (!userId || !rewardId /*|| !pointsSpent*/) {
       response.message = "Missing required fields!";
       return res.status(400).json(response);
     }
 
     // * check if the current points of the user is sufficient to claim the reward
     let userPoints = await getCurrentUserPointsAvailable(userId);
-    let rewardPrice = await getPointsRequiredForReward(rewardId);
+    let pointsRequired = await getPointsRequiredForReward(rewardId);
 
-    if (userPoints < rewardPrice) {
+    if (userPoints < pointsRequired) {
       response.message = "Insufficient points!";
       return res.json(response);
     }
 
     // ? testing purposes only
-    if (userPoints && rewardPrice) {
+    if (userPoints && pointsRequired) {
       console.log("curr user points:", userPoints);
-      console.log("points needed:", rewardPrice);
+      console.log("points needed:", pointsRequired);
     }
+
+    // * check if stocks available is sufficient
+    let stocks = await getStockAvailableForReward(rewardId);
+    if (stocks <= 0) {
+      response.message = "Insufficient stock for this reward!";
+      return res.json(response);
+    }
+
+    // * update stock
+    await updateRewardStocks(--stocks, rewardId);
 
     // * adding a new claimed rewards record in the reward claim collection
     await rewardClaimModel.create({
       userId,
       rewardId,
-      pointsSpent,
+      pointsSpent: pointsRequired,
     });
 
     response.message = "Rewards claimed history successfully saved!";
     response.success = true;
     return res.json(response);
   } catch (error) {
-    console.error("ERROR:", err);
+    console.error("ERROR:", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
+  }
+};
+
+// * update reward claim record
+const updateRewardClaim = async (req, res) => {
+  const response = createResponse();
+  try {
+    // * destructure for easier access
+    const { userId, rewardId, pointsSpent } = req.body;
+    const _id = req.params.id;
+
+    // * validate the req body first before anything
+    if (!_id || !userId || !rewardId || !pointsSpent) {
+      response.message = "Missing required fields!";
+      return res.status(400).json(response);
+    }
+
+    // * updating a disposed bottle record in the disposal collection
+    await rewardClaimModel.findByIdAndUpdate(_id, {
+      userId,
+      rewardId,
+      pointsSpent,
+    });
+
+    response.message = "Reward claim record successfuly updated!";
+    response.success = true;
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
+  }
+};
+
+// * delete reward claim record
+const removeRewardClaim = async (req, res) => {
+  const response = createResponse();
+  try {
+    const _id = req.params.id;
+    const deletedRewardClaimed = await rewardClaimModel.findByIdAndDelete(_id);
+    if (deletedRewardClaimed) {
+      response.message = "Reward claim record successfuly deleted!";
+      response.success = true;
+    } else {
+      response.message = "Reward claim record does not exists!";
+      response.success = false;
+    }
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
+  }
+};
+
+// * delete reward claim record per user
+const removeUserRewardClaim = async (req, res) => {
+  const response = createResponse();
+  try {
+    const userId = req.params.userId;
+    const deletedRewardClaimRecords = await rewardClaimModel.deleteMany({
+      userId: userId,
+    });
+    if (deletedRewardClaimRecords.deletedCount > 0) {
+      response.message =
+        "All reward claim records for the user have been successfully deleted!";
+      response.success = true;
+    } else {
+      response.message = "No disposed bottle records found for the user!";
+      response.success = false;
+    }
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
     response.message = "Internal server error";
     return res.status(500).json(response);
   }
@@ -234,4 +411,10 @@ export {
   getOneUserDisposedBottleHistory,
   getAllUsersRewardClaimHistory,
   getOneUserRewardClaimHistory,
+  updateDisposedBottle,
+  removeDisposedBottle,
+  updateRewardClaim,
+  removeRewardClaim,
+  removeUserDisposedBottle,
+  removeUserRewardClaim,
 };

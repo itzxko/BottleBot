@@ -1,4 +1,5 @@
 import { rewardModel } from "../models/rewardModel.js";
+import { rewardClaimModel } from "../models/rewardClaimModel.js";
 import { createResponse } from "../utils/response.js";
 import fs from "fs";
 
@@ -14,6 +15,22 @@ const getPointsRequiredForReward = async (rewardId) => {
     return reward.pointsRequired;
   } catch (err) {
     console.error("Error retrieving pointsRequired for reward:", err);
+    throw err;
+  }
+};
+
+// * get stock available for a specific reward by ID
+const getStockAvailableForReward = async (rewardId) => {
+  try {
+    const reward = await rewardModel.findById(rewardId, "stocks");
+
+    if (!reward) {
+      throw new Error("Reward not found");
+    }
+
+    return reward.stocks;
+  } catch (err) {
+    console.error("Error retrieving stocks for reward:", err);
     throw err;
   }
 };
@@ -108,6 +125,28 @@ const updateReward = async (req, res) => {
     response.message = "Reward successfuly updated!";
     response.success = true;
     return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
+  }
+};
+
+const updateRewardStocks = async (updatedStocks, _id) => {
+  try {
+    // * updating reward stocks in the reward collection
+    const updatedStock = await rewardModel.findByIdAndUpdate(
+      _id,
+      { stocks: updatedStocks },
+      {
+        new: true, // * ensure the updated is returned
+      }
+    );
+    console.log(
+      `${updatedStock.rewardName}'s stock updated to :`,
+      updatedStock.stocks
+    );
+    return updatedStock;
   } catch (error) {
     console.error("ERROR : ", error);
     response.message = "Internal server error";
@@ -219,6 +258,13 @@ const removeReward = async (req, res) => {
   const response = createResponse();
   try {
     const _id = req.params.id;
+    // * before deleting reward, delete all connected documents
+    const deletedRewardClaimHistory = await rewardClaimModel.deleteMany({
+      rewardId: _id,
+    });
+    if (deletedRewardClaimHistory.deletedCount <= 0) {
+      console.log("No reward claim history to be deleted for this reward.");
+    }
     const deletedReward = await rewardModel.findByIdAndDelete(_id);
     if (deletedReward) {
       removeRewardImage(deletedReward.image);
@@ -243,4 +289,6 @@ export {
   updateReward,
   removeReward,
   getPointsRequiredForReward,
+  getStockAvailableForReward,
+  updateRewardStocks,
 };

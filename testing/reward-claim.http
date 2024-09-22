@@ -9,9 +9,10 @@ Content-Type: application/json
 
 {
   "userId": "66eda9be5bd1b94d69bddfcc",
-  "rewardId": "66eefacb3479f08d051566f6",
-  "pointsSpent": 1
+  "rewardId": "66eefacb3479f08d051566f6"
 }
+
+# "pointsSpent": 1
 
 ### * test route 2 for adding rewards claimed history
 POST {{baseUrl}}/history/claim
@@ -19,12 +20,30 @@ Content-Type: application/json
 
 {
   "userId": "66ed98453aa56d8e612b209b",
-  "rewardId": "66eefacb3479f08d051566f6",
-  "pointsSpent": 1
+  "rewardId": "66eefacb3479f08d051566f6"
 }
+
+# "pointsSpent": 1
 
 ### * test route for getting all users reward claim history
 GET {{baseUrl}}/history/claim
 
 ### * test route for getting one user reward claim history
 GET {{baseUrl}}/history/claim/66ed98453aa56d8e612b209b
+
+### * test route for updating reward claim history
+PUT {{baseUrl}}/history/claim/66ef1373265204a3d62c53d5
+Content-Type: application/json
+
+{
+  "userId": "66ed98453aa56d8e612b209b",
+  "rewardId": "66eefacb3479f08d051566f6"
+}
+
+# "pointsSpent": 3
+
+### * test route for removing reward claim history
+DELETE {{baseUrl}}/history/claim/66ef0ef8f1634b06d18fc9cf
+
+### * test route for removing reward claim history per user
+DELETE {{baseUrl}}/history/claim/all/66eda9be5bd1b94d69bddfcc

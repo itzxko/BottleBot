@@ -6,6 +6,7 @@ import cors from "cors";
 import { tryMongoDBAtlasConnection } from "./config/database.js";
 import { rewardRoutes } from "./routes/rewardRoutes.js";
 import historyRoutes from "./routes/historyRoutes.js";
+import bottleBotConfigRoutes from "./routes/bottleBotConfigRoutes.js";
 
 let app = express();
 app.listen(8080);
@@ -35,6 +36,9 @@ app.use("/api/rewards", rewardRoutes);
 
 // * history routes for rewards claimed and bottle disposed
 app.use("/api/history", historyRoutes);
+
+// * config routes for configurations set by admin
+app.use("/api/configurations", bottleBotConfigRoutes);
 
 // * start server
 app.get("/", (req, res) => {
