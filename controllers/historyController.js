@@ -14,7 +14,7 @@ import {
 // * BOTTLE DISPOSAL HISTORY
 
 // * calculate total bottle count of user
-const getUserBottleDisposalCount = async (userId) => {
+const calculateUserBottleDisposalCount = async (userId) => {
   try {
     // * calculate total count of disposed bottles by the user
     const bottleCount = await bottleDisposalModel.aggregate([
@@ -35,6 +35,22 @@ const getUserBottleDisposalCount = async (userId) => {
   } catch (err) {
     console.error("Error calculating total bottle count:", err);
     throw err;
+  }
+};
+
+// * return user's bottle count
+const getUserBottleDisposalCount = async (req, res) => {
+  const response = createResponse();
+  const { userId } = req.params;
+  try {
+    const totalBottleCount = await calculateUserBottleDisposalCount(userId);
+    response.success = true;
+    response.totalBottleCount = { totalBottleCount };
+    response.message = "Bottle count calculated successfully!";
+    return res.json(response);
+  } catch (err) {
+    response.message = "Error calculating total bottle count";
+    return res.status(500).json(response);
   }
 };
 
@@ -94,7 +110,7 @@ const disposeBottle = async (req, res) => {
     });
 
     // ? testing purposes only
-    let count = await getUserBottleDisposalCount(userId);
+    let count = await calculateUserBottleDisposalCount(userId);
     if (count) {
       console.log("disposed bottle count : ", count);
     }
@@ -192,7 +208,7 @@ const removeUserDisposedBottle = async (req, res) => {
 // * REWARDS CLAIMED HISTORY
 
 // * calculate user available points
-const getCurrentUserPointsAvailable = async (userId) => {
+const calculateCurrentUserPointsAvailable = async (userId) => {
   try {
     // * calculate total points accumulated by the user from bottle disposal
     const accumulatedPointsResult = await bottleDisposalModel.aggregate([
@@ -235,6 +251,23 @@ const getCurrentUserPointsAvailable = async (userId) => {
   } catch (err) {
     console.error("Error calculating available points:", err);
     throw err;
+  }
+};
+
+// * return available points for the user
+const getCurrentUserPointsAvailable = async (req, res) => {
+  const response = createResponse();
+  const { userId } = req.params;
+
+  try {
+    const availablePoints = await calculateCurrentUserPointsAvailable(userId);
+    response.success = true;
+    response.availablePoints = { availablePoints };
+    response.message = "User's available points calculated successfully!";
+    return res.json(response);
+  } catch (err) {
+    response.message = "Error calculating available points";
+    return res.status(500).json(response);
   }
 };
 
@@ -287,7 +320,7 @@ const claimReward = async (req, res) => {
     }
 
     // * check if the current points of the user is sufficient to claim the reward
-    let userPoints = await getCurrentUserPointsAvailable(userId);
+    let userPoints = await calculateCurrentUserPointsAvailable(userId);
     let pointsRequired = await getPointsRequiredForReward(rewardId);
 
     if (userPoints < pointsRequired) {
@@ -417,4 +450,6 @@ export {
   removeRewardClaim,
   removeUserDisposedBottle,
   removeUserRewardClaim,
+  getUserBottleDisposalCount,
+  getCurrentUserPointsAvailable,
 };

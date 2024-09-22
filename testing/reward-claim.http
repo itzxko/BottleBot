@@ -47,3 +47,6 @@ DELETE {{baseUrl}}/history/claim/66ef0ef8f1634b06d18fc9cf
 
 ### * test route for removing reward claim history per user
 DELETE {{baseUrl}}/history/claim/all/66eda9be5bd1b94d69bddfcc
+
+### * test route for getting one user current points
+GET {{baseUrl}}/history/claim/points/66ed98453aa56d8e612b209b
