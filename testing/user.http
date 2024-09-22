@@ -76,4 +76,4 @@ Content-Type: application/json
 }
 
 ### * test route for deleting user
-DELETE {{baseUrl}}/users/66ed7c143ba05dc02fcb1163
+DELETE {{baseUrl}}/users/66ed98183aa56d8e612b2097

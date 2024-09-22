@@ -1,0 +1,44 @@
+# ! FOR SUCCESSFUL TESTING, IF PORT HAS BEEN CHANGED, 
+# ! MAKE SURE TO MODIFY PORTS ON OTHER TESTING FILE
+@port = 8080
+@baseUrl = http://localhost:{{port}}/api
+
+### * test route for checking if configs are set
+GET {{baseUrl}}/configurations
+
+### * test route getting equivalent points based on bottle weight
+GET {{baseUrl}}/configurations/calculate/0.10
+
+### * test route for setting configs
+POST {{baseUrl}}/configurations
+Content-Type: application/json
+
+{
+  "defaultLocation": {
+    "locationName": "162 Barangay St, Bagong Barrio West, Caloocan, Metro Manila",
+    "lat": 14.668809260530953,
+    "lon": 120.99964483582916
+  },
+  "bottleExchange": {
+    "baseWeight": 1,
+    "baseUnit": "kg",
+    "equivalentInPoints": 16
+  }
+}
+
+### * test route for updating configs
+PUT {{baseUrl}}/configurations/66eff479cb8dbe0f68da504f
+Content-Type: application/json
+
+{
+  "defaultLocation": {
+    "locationName": "162 Barangay St, Bagong Barrio West, Caloocan, Metro Manila",
+    "lat": 14.668809260530953,
+    "lon": 120.99964483582916
+  },
+  "bottleExchange": {
+    "baseWeight": 20,
+    "baseUnit": "kg",
+    "equivalentInPoints": 10
+  }
+}

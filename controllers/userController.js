@@ -1,8 +1,10 @@
 import { userModel } from "../models/userModel.js";
+import { rewardClaimModel } from "../models/rewardClaimModel.js";
+import { bottleDisposalModel } from "../models/bottleDisposalModel.js";
 import { createResponse } from "../utils/response.js";
 
 // * check if email is a duplicate
-const isEmailAlreadyInUsed = async (credentials, userId) => {
+const isEmailAlreadyInUse = async (credentials, userId) => {
   try {
     return await userModel.findOne({
       "credentials.email": credentials.email,
@@ -34,7 +36,7 @@ const isNameAlreadyExists = async (personalInfo, userId) => {
 };
 
 // * check if number is a duplicate
-const isNumberAlreadyInUsed = async (contactInfo, userId) => {
+const isNumberAlreadyInUse = async (contactInfo, userId) => {
   try {
     return await userModel.findOne({
       // * check if any number is in the array
@@ -118,14 +120,14 @@ const registerUser = async (req, res) => {
       return res.json(response);
     }
 
-    let isNumberExists = await isNumberAlreadyInUsed(contactInfo);
+    let isNumberExists = await isNumberAlreadyInUse(contactInfo);
 
     if (isNumberExists) {
       response.message = "This number is already registered";
       return res.json(response);
     }
 
-    let isEmailExists = await isEmailAlreadyInUsed(credentials);
+    let isEmailExists = await isEmailAlreadyInUse(credentials);
 
     if (isEmailExists) {
       response.message = "Email is already in used";
@@ -191,14 +193,14 @@ const updateUser = async (req, res) => {
       return res.json(response);
     }
 
-    let isNumberExists = await isNumberAlreadyInUsed(contactInfo, _id);
+    let isNumberExists = await isNumberAlreadyInUse(contactInfo, _id);
 
     if (isNumberExists) {
       response.message = "This number is already registered";
       return res.json(response);
     }
 
-    let isEmailExists = await isEmailAlreadyInUsed(credentials, _id);
+    let isEmailExists = await isEmailAlreadyInUse(credentials, _id);
 
     if (isEmailExists) {
       response.message = "Email is already in used";
@@ -227,6 +229,20 @@ const removeUser = async (req, res) => {
   const response = createResponse();
   try {
     const _id = req.params.id;
+
+    // * before deleting user, delete all connected documents
+    const deletedRewardClaimHistory = await rewardClaimModel.deleteMany({
+      userId: _id,
+    });
+    if (deletedRewardClaimHistory.deletedCount <= 0) {
+      console.log("No reward claim history to be deleted for this user.");
+    }
+    const deletedDisposalHistory = await bottleDisposalModel.deleteMany({
+      userId: _id,
+    });
+    if (deletedDisposalHistory.deletedCount <= 0) {
+      console.log("No disposal history to be deleted for this user.");
+    }
     const deletedUser = await userModel.findByIdAndDelete(_id);
     if (deletedUser) {
       response.message = "User successfuly deleted!";
