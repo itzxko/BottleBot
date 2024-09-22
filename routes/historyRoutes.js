@@ -12,6 +12,8 @@ import {
   updateRewardClaim,
   removeRewardClaim,
   removeUserRewardClaim,
+  getUserBottleDisposalCount,
+  getCurrentUserPointsAvailable,
 } from "../controllers/historyController.js";
 const historyRoutes = express.Router();
 
@@ -34,6 +36,10 @@ historyRoutes.get("/dispose", getAllUsersDisposedBottleHistory);
 // * get one user disposal history
 historyRoutes.get("/dispose/:userId", getOneUserDisposedBottleHistory);
 
+// * get user's bottle count
+historyRoutes.get("/dispose/bottle/:userId", getUserBottleDisposalCount);
+
+
 // * REWARD CLAIM
 // * add a new reward claim history
 historyRoutes.post("/claim", claimReward);
@@ -52,5 +58,8 @@ historyRoutes.get("/claim", getAllUsersRewardClaimHistory);
 
 // * get one user reward claim history
 historyRoutes.get("/claim/:userId", getOneUserRewardClaimHistory);
+
+// * get user's points
+historyRoutes.get("/claim/points/:userId", getCurrentUserPointsAvailable);
 
 export default historyRoutes;

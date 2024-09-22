@@ -10,7 +10,7 @@ Content-Type: application/json
 {
   "userId": "66eda9be5bd1b94d69bddfcc",
   "bottleCount": 1,
-  "pointsAccumulated": 0.05
+  "pointsAccumulated": 2
 }
 
 ### * test route 2 for adding bottle disposal history
@@ -19,8 +19,8 @@ Content-Type: application/json
 
 {
   "userId": "66ed98453aa56d8e612b209b",
-  "bottleCount": 2,
-  "pointsAccumulated": 2
+  "bottleCount": 1,
+  "pointsAccumulated": 1
 }
 
 ### * test route for getting all users disposal history
@@ -44,3 +44,6 @@ DELETE {{baseUrl}}/history/dispose/66ef08b46b6630441b343450
 
 ### * test route for removing bottle disposal history per user
 DELETE {{baseUrl}}/history/dispose/all/66ed98453aa56d8e612b209b
+
+### * test route for getting one user total bottle dispose
+GET {{baseUrl}}/history/dispose/bottle/66ed98453aa56d8e612b209b
