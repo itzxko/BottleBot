@@ -55,8 +55,18 @@ const isNumberAlreadyInUse = async (contactInfo, userId) => {
 const getAllUsers = async (req, res) => {
   const response = createResponse();
   try {
-    let users = await userModel.find({});
-    response.message = "All users retrieved successfully!";
+    // * for searching/filtering, check if the 'level' exists
+    const { level } = req.query;
+    // * create filter obj dynamically based on level
+    let filter = {};
+    if (level) {
+      filter["credentials.level"] = level;
+    }
+
+    let users = await userModel.find(filter);
+    response.message = level
+      ? `Users with level '${level}' retrieved successfully!`
+      : "All users retrieved successfully!";
     response.success = true;
     response.users = users;
     return res.json(response);

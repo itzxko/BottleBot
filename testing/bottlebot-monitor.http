@@ -1,0 +1,12 @@
+# ! FOR SUCCESSFUL TESTING, IF PORT HAS BEEN CHANGED, 
+# ! MAKE SURE TO MODIFY PORTS ON OTHER TESTING FILE
+@port = 8080
+@baseUrl = http://localhost:{{port}}/api
+
+### * test route to send value of led to monitor
+POST {{baseUrl}}/monitor
+Content-Type: application/json
+
+{
+  "value": 5
+}
