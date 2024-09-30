@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const tryMongoDBAtlasConnection = async () => {
   const uri = process.env.MONGO_URI;
-  console.log("URI : ", uri);
+  // console.log("URI : ", uri);
   const isConnected = await mongoose.connect(uri);
   if (isConnected) {
     console.log("CONNECTED TO ATLAS DATABASE");

@@ -7,9 +7,18 @@ import { tryMongoDBAtlasConnection } from "./config/database.js";
 import { rewardRoutes } from "./routes/rewardRoutes.js";
 import historyRoutes from "./routes/historyRoutes.js";
 import bottleBotConfigRoutes from "./routes/bottleBotConfigRoutes.js";
+import bottleBotMonitorRoutes from "./routes/botleBotMonitorRoutes.js";
+
+import { WebSocketServer } from "ws";
+import { createResponse } from "./utils/response.js";
 
 let app = express();
-app.listen(8080);
+const PORT = 8080;
+const server = app.listen(PORT);
+
+// * STEP 1 WS - setup the web socket connection
+// * connect fe using url (ws://localhost:PORT_HERE)
+const wss = new WebSocketServer({ server });
 
 // * middlewares
 dotenv.config();
@@ -40,7 +49,29 @@ app.use("/api/history", historyRoutes);
 // * config routes for configurations set by admin
 app.use("/api/configurations", bottleBotConfigRoutes);
 
+// * routes to receive req for real-time bot monitoring
+app.use("/api/monitor", bottleBotMonitorRoutes);
+
+// * STEP 2 WS - connect the client (frontend)
+// * to the websocket connection for real-time updates
+wss.on("connection", (ws) => {
+  console.log("Client connected");
+
+  // * if fe sends some message/data it will log here
+  ws.on("message", (message) => {
+    console.log("Received Message:", JSON.parse(message));
+    // * after receiving some data u can also return some message on the backend
+    const response = createResponse();
+    response.message = "Message received, this is a response from backend";
+    response.success = true;
+    ws.send(JSON.stringify(response));
+  });
+});
+
 // * start server
 app.get("/", (req, res) => {
   res.send("Server Started");
 });
+
+// * to be accessible in websocket routes
+export { wss };

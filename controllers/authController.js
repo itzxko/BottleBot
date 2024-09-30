@@ -65,11 +65,12 @@ const login = async (req, res) => {
     const token = generateToken(userFromDatabase.credentials.email); // * using userFromDatabase's email
     response.message = "Login success!";
     response.success = true;
-    response.user = {
-      firstName: userFromDatabase.personalInfo.firstName,
-      lastName: userFromDatabase.personalInfo.lastName,
-      email: userFromDatabase.credentials.email,
-    };
+    response.user = userFromDatabase;
+    // response.user = {
+    //   firstName: userFromDatabase.personalInfo.firstName,
+    //   lastName: userFromDatabase.personalInfo.lastName,
+    //   email: userFromDatabase.credentials.email,
+    // };
     response.token = token;
 
     return res.json(response);

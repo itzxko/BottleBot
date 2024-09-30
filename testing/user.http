@@ -9,6 +9,10 @@ GET {{baseUrl}}/users/
 ### * test route to get one user
 GET {{baseUrl}}/users/66ed7df69271160de05cbd59
 
+
+### * test route to filter user by level
+GET {{baseUrl}}/users?level=citizen
+
 ### * test route for register
 POST {{baseUrl}}/users/register
 Content-Type: application/json
