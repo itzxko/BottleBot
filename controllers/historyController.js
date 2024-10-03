@@ -58,7 +58,59 @@ const getUserBottleDisposalCount = async (req, res) => {
 const getAllUsersDisposedBottleHistory = async (req, res) => {
   const response = createResponse();
   try {
-    let allusersdisposalhistory = await bottleDisposalModel.find({});
+    // * for filter
+    const { userName } = req.query;
+    // * create filter obj dynamically
+    let filter = {};
+    if (userName) {
+      // * for searching in multiple fields with a match anywhere, case-insensitive
+      filter["$or"] = [
+        {
+          "userInfo.personalInfo.firstName": {
+            $regex: userName,
+            $options: "i",
+          },
+        },
+        {
+          "userInfo.personalInfo.middleName": {
+            $regex: userName,
+            $options: "i",
+          },
+        },
+        {
+          "userInfo.personalInfo.lastName": { $regex: userName, $options: "i" },
+        },
+      ];
+    }
+
+    // * use aggregation to lookup user details and filter based on name
+    let allusersdisposalhistory = await bottleDisposalModel.aggregate([
+      {
+        $lookup: {
+          from: "users", // * match the collection name in MongoDB
+          localField: "userId",
+          foreignField: "_id",
+          as: "userInfo",
+        },
+      },
+      {
+        $unwind: "$userInfo", // * unwind to treat the array as an object
+      },
+      {
+        $match: filter, // * filter based on the user name
+      },
+      {
+        $project: {
+          bottleCount: 1,
+          pointsAccumulated: 1,
+          dateDisposed: 1,
+          "userInfo.personalInfo.firstName": 1,
+          "userInfo.personalInfo.middleName": 1,
+          "userInfo.personalInfo.lastName": 1,
+        },
+      },
+    ]);
+
     response.message = "all disposal record retrieved successfully!";
     response.success = true;
     response.allusersdisposalhistory = allusersdisposalhistory;
@@ -275,7 +327,56 @@ const getCurrentUserPointsAvailable = async (req, res) => {
 const getAllUsersRewardClaimHistory = async (req, res) => {
   const response = createResponse();
   try {
-    let allusersrewardclaimhistory = await rewardClaimModel.find({});
+    // * for filter
+    const { userName } = req.query;
+    // * create filter obj dynamically
+    let filter = {};
+    if (userName) {
+      // * for searching in multiple fields with a match anywhere, case-insensitive
+      filter["$or"] = [
+        {
+          "userInfo.personalInfo.firstName": {
+            $regex: userName,
+            $options: "i",
+          },
+        },
+        {
+          "userInfo.personalInfo.middleName": {
+            $regex: userName,
+            $options: "i",
+          },
+        },
+        {
+          "userInfo.personalInfo.lastName": { $regex: userName, $options: "i" },
+        },
+      ];
+    }
+    let allusersrewardclaimhistory = await rewardClaimModel.aggregate([
+      {
+        $lookup: {
+          from: "users", // * match the collection name in MongoDB
+          localField: "userId",
+          foreignField: "_id",
+          as: "userInfo",
+        },
+      },
+      {
+        $unwind: "$userInfo", // * unwind to treat the array as an object
+      },
+      {
+        $match: filter, // * filter based on the user name
+      },
+      {
+        $project: {
+          bottleCount: 1,
+          pointsAccumulated: 1,
+          dateDisposed: 1,
+          "userInfo.personalInfo.firstName": 1,
+          "userInfo.personalInfo.middleName": 1,
+          "userInfo.personalInfo.lastName": 1,
+        },
+      },
+    ]);
     response.message = "all reward claim record retrieved successfully!";
     response.success = true;
     response.allusersrewardclaimhistory = allusersrewardclaimhistory;
