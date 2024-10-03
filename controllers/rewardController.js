@@ -159,13 +159,16 @@ const getAllRewards = async (req, res) => {
   const response = createResponse();
   try {
     // * for searching/filtering, check if the 'category' exists
-    const { category } = req.query;
+    const { category, rewardName } = req.query;
     // * create filter obj dynamically based on the category
     let filter = {};
     if (category) {
       filter.category = category;
     }
-
+    if (rewardName) {
+      // * partial and case-insensitive search on rewardName
+      filter.rewardName = { $regex: rewardName, $options: "i" };
+    }
     let rewards = await rewardModel.find(filter);
     response.message = category
       ? `Rewards in category '${category}' retrieved successfully!`

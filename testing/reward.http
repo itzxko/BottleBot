@@ -34,3 +34,6 @@ Content-Type: image/jpeg
 
 ### * test route for sorting rewards by category
 GET {{baseUrl}}/rewards?category=Beverage
+
+### * test route for fitering rewards by name
+GET {{baseUrl}}/rewards?category=Beverage&rewardName=Kapepe
