@@ -11,6 +11,7 @@ import bottleBotMonitorRoutes from "./routes/botleBotMonitorRoutes.js";
 
 import { WebSocketServer } from "ws";
 import { createResponse } from "./utils/response.js";
+import bottleBotQueueRoutes from "./routes/bottleBotQueueRoutes.js";
 
 let app = express();
 const PORT = 8080;
@@ -67,6 +68,9 @@ wss.on("connection", (ws) => {
     ws.send(JSON.stringify(response));
   });
 });
+
+// * routes to receive request for queuing
+app.use("/api/queue", bottleBotQueueRoutes);
 
 // * start server
 app.get("/", (req, res) => {

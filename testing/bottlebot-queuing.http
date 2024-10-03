@@ -1,0 +1,36 @@
+# ! FOR SUCCESSFUL TESTING, IF PORT HAS BEEN CHANGED, 
+# ! MAKE SURE TO MODIFY PORTS ON OTHER TESTING FILE
+@port = 8080
+@baseUrl = http://localhost:{{port}}/api
+
+### * test1 request to queue for bot navigation
+POST {{baseUrl}}/queue
+Content-Type: application/json
+
+{
+  "userId" : "66ed98453aa56d8e612b209b",
+  "location": {
+    "lon" : 4.0,
+    "lat" : 4.0,
+    "locationName" : "Dyan lang sa gedli :)"
+  },
+  "status" : "pending"
+}
+
+### * test2 request to queue for bot navigation
+POST {{baseUrl}}/queue
+Content-Type: application/json
+
+{
+  "userId" : "66fb1017ff0811b349be12fa",
+  "location": {
+    "lon" : 3.0,
+    "lat" : 3.0,
+    "locationName" : "Dyan lang sa gedli :)"
+  },
+  "status" : "pending"
+}
+
+### * test request to remove location queue for finished navigation
+# * NOTE U NEED THE QUEUE ID HERE NOT USER ID
+DELETE {{baseUrl}}/queue/66fed143e54f1567c7869b87
