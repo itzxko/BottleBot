@@ -56,11 +56,20 @@ const getAllUsers = async (req, res) => {
   const response = createResponse();
   try {
     // * for searching/filtering, check if the 'level' exists
-    const { level } = req.query;
-    // * create filter obj dynamically based on level
+    const { level, userName } = req.query;
+    // * create filter obj dynamically
     let filter = {};
     if (level) {
       filter["credentials.level"] = level;
+    }
+
+    if (userName) {
+      // * for searching in multiple fields with a match anywhere, case-insensitive
+      filter["$or"] = [
+        { "personalInfo.firstName": { $regex: userName, $options: "i" } },
+        { "personalInfo.middleName": { $regex: userName, $options: "i" } },
+        { "personalInfo.lastName": { $regex: userName, $options: "i" } },
+      ];
     }
 
     let users = await userModel.find(filter);

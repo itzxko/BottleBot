@@ -8,7 +8,7 @@ POST {{baseUrl}}/history/dispose
 Content-Type: application/json
 
 {
-  "userId": "66eda9be5bd1b94d69bddfcc",
+  "userId": "66fb133aff0811b349be131c",
   "bottleCount": 1,
   "pointsAccumulated": 2
 }
@@ -25,6 +25,9 @@ Content-Type: application/json
 
 ### * test route for getting all users disposal history
 GET {{baseUrl}}/history/dispose
+
+### * test route for getting all users with name filter
+GET {{baseUrl}}/history/dispose?userName=Josh
 
 ### * test route for getting one user disposal history
 GET {{baseUrl}}/history/dispose/66ed98453aa56d8e612b209b
