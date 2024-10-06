@@ -28,6 +28,7 @@ const realtime = async (data) => {
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
       const response = createResponse();
+      response.realTimeType = "botstate";
       response.message = "New data received";
       response.data = data;
       response.success = true;

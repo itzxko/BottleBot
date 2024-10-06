@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 // * trying to connect on database using mongoose
-tryMongoDBAtlasConnection();
+await tryMongoDBAtlasConnection();
 
 // * dir for images
 app.use("/api/images", express.static("uploads"));
@@ -63,6 +63,7 @@ wss.on("connection", (ws) => {
     console.log("Received Message:", JSON.parse(message));
     // * after receiving some data u can also return some message on the backend
     const response = createResponse();
+    response.realTimeType = "ws connection";
     response.message = "Message received, this is a response from backend";
     response.success = true;
     ws.send(JSON.stringify(response));

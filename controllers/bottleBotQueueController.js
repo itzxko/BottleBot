@@ -1,10 +1,16 @@
 import { createResponse } from "../utils/response.js";
 import { bottleBotQueueModel } from "../models/bottleBotQueueModel.js";
+import { wss } from "../server.js";
+import WebSocket from "ws";
+
+// TODO: TEST TOM ON WEBSOCKET AND NODEMCU!!!!!!!!!!!!!!!!!!!
 
 // * add new request on queue
 const addToQueue = async (req, res) => {
   const response = createResponse();
   try {
+    console.log("ADDED TO QUEUE");
+
     // * destructure for easier access
     const { userId, location } = req.body;
 
@@ -25,6 +31,10 @@ const addToQueue = async (req, res) => {
     response.sortedQueue = sortedQueue;
     response.message = "Request has been queued!";
     response.success = true;
+
+    // * call ws function to notify frontend
+    updateRealtime(sortedQueue);
+
     res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);
@@ -37,6 +47,8 @@ const addToQueue = async (req, res) => {
 const removeToQueue = async (req, res) => {
   const response = createResponse();
   try {
+    console.log("REMOVED FROM QUEUE");
+
     const _id = req.params.id;
     const deletedQueuedRequest = await bottleBotQueueModel.findByIdAndDelete(
       _id
@@ -46,6 +58,8 @@ const removeToQueue = async (req, res) => {
       response.message = "Queued request successfuly removed!";
       response.success = true;
       response.sortedQueue = sortedQueue;
+      // * call ws function to notify frontend
+      updateRealtime(sortedQueue);
     } else {
       response.message = "Queued request does not exists!";
       response.success = false;
@@ -78,15 +92,36 @@ const updateQueuing = async () => {
           firstRequest._id, // * update the specific first pending request
           { status: "in progress" } // * update its status
         );
+        console.log("CURRENT FIRST IN QUEUE UPDATED");
       }
     }
 
     // * Sort queue by request time
     const sortedQueue = await bottleBotQueueModel.find().sort({ createdAt: 1 });
 
+    // * call ws function to notify frontend
+    updateRealtime(sortedQueue);
+
     return sortedQueue;
   } catch (error) {
     console.error("ERROR", error);
   }
 };
+
+// * real-time updates on frontend
+const updateRealtime = async (data) => {
+  // * Send the data to all connected clients
+  // * return the data to the client (frontend)
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      const response = createResponse();
+      response.realTimeType = "queue";
+      response.message = "Updated queue received";
+      response.data = data;
+      response.success = true;
+      client.send(JSON.stringify(response));
+    }
+  });
+};
+
 export { addToQueue, removeToQueue };

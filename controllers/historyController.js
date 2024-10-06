@@ -368,12 +368,14 @@ const getAllUsersRewardClaimHistory = async (req, res) => {
       },
       {
         $project: {
-          bottleCount: 1,
-          pointsAccumulated: 1,
-          dateDisposed: 1,
           "userInfo.personalInfo.firstName": 1,
           "userInfo.personalInfo.middleName": 1,
           "userInfo.personalInfo.lastName": 1,
+          _id: 1,
+          userId: 1,
+          rewardId: 1,
+          pointsSpent: 1,
+          dateClaimed: 1,
         },
       },
     ]);
