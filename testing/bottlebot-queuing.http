@@ -33,4 +33,4 @@ Content-Type: application/json
 
 ### * test request to remove location queue for finished navigation
 # * NOTE U NEED THE QUEUE ID HERE NOT USER ID
-DELETE {{baseUrl}}/queue/66fed143e54f1567c7869b87
+DELETE {{baseUrl}}/queue/66fed3c373a269ad64fd9c56
