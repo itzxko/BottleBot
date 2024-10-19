@@ -8,7 +8,7 @@ POST {{baseUrl}}/queue
 Content-Type: application/json
 
 {
-  "userId" : "66ed98453aa56d8e612b209b",
+  "userId" : "67138360c8332cd6e74bb37b",
   "location": {
     "lon" : 4.0,
     "lat" : 4.0,
@@ -22,7 +22,7 @@ POST {{baseUrl}}/queue
 Content-Type: application/json
 
 {
-  "userId" : "66fb1017ff0811b349be12fa",
+  "userId" : "67138360c8332cd6e74bb37b",
   "location": {
     "lon" : 3.0,
     "lat" : 3.0,
