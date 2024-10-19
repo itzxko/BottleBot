@@ -97,7 +97,13 @@ const updateQueuing = async () => {
     }
 
     // * Sort queue by request time
-    const sortedQueue = await bottleBotQueueModel.find().sort({ createdAt: 1 });
+    const sortedQueue = await bottleBotQueueModel
+      .find()
+      .sort({ createdAt: 1 })
+      .populate({
+        path: "userId",
+        select: "personalInfo",
+      });
 
     // * call ws function to notify frontend
     updateRealtime(sortedQueue);
