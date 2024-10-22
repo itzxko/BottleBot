@@ -29,9 +29,11 @@ const isBottleBotConfigSet = async (req, res) => {
 
   response.message = result.message;
   response.success = result.success;
+  response.config = result.config;
 
   return res.json(response);
 };
+
 
 // * calculate equivalent points of one bottle based on weight
 const getEquivalentInPointsBasedOnWeight = async (req, res) => {
