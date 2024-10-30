@@ -37,3 +37,10 @@ GET {{baseUrl}}/rewards?category=Beverage
 
 ### * test route for fitering rewards by name
 GET {{baseUrl}}/rewards?category=Beverage&rewardName=Kapepe
+
+### * test route for reward pagination
+GET {{baseUrl}}/rewards?page=1&limit=1
+
+### * test route for reward pagination with filter
+
+GET {{baseUrl}}/rewards?category=Goods&page=1&limit=1

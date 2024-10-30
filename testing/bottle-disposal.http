@@ -50,3 +50,13 @@ DELETE {{baseUrl}}/history/dispose/all/66ed98453aa56d8e612b209b
 
 ### * test route for getting one user total bottle dispose
 GET {{baseUrl}}/history/dispose/bottle/66ed98453aa56d8e612b209b
+
+
+### * test route for all users bottle disposal pagination
+GET {{baseUrl}}/history/dispose?page=1&limit=1
+
+### * test route for all users bottle disposal pagination based on user name
+GET {{baseUrl}}/history/dispose?userName=Staff&page=1&limit=1
+
+### * test route for one user disposal history pagination
+GET {{baseUrl}}/history/dispose/67164816e226d5fe58818645?page=1&limit=1

@@ -85,3 +85,22 @@ Content-Type: application/json
 
 ### * test route for deleting user
 DELETE {{baseUrl}}/users/66ed98183aa56d8e612b2097
+
+
+### * FOR PAGINATION !!!!
+### * test route for pagination default page and default limit (number of items)
+GET {{baseUrl}}/users?page=1&limit=3
+### * test route for pagination with a filter
+GET {{baseUrl}}/users?userName=User&page=1&limit=3
+
+### * LOGIC
+### * declare a var for currentPage
+### * optionally, if you want to control the number of items to get 
+### *   declare a var for limit
+
+### * when user click on next page, increment the page number (page++ or page += 1) 
+### * when user click on prev page, decrement the page number (page-- or page -= 1)
+### * when user clicks directly on the page number, 
+### *   just set the current page on that number (page = userClickedPage)
+### * dont forget the validations (current page number >= 1) 
+### *   and (currentpage number <= totalAvailablePages)

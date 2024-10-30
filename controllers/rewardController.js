@@ -19,6 +19,46 @@ const getPointsRequiredForReward = async (rewardId) => {
   }
 };
 
+// * check if reward status is active
+const getRewardStatus = async (rewardId) => {
+  try {
+    const reward = await rewardModel.findById(rewardId, "status");
+
+    if (!reward) {
+      throw new Error("Reward not found");
+    }
+
+    return reward.status;
+  } catch (err) {
+    console.error("Error retrieving pointsRequired for reward:", err);
+    throw err;
+  }
+};
+
+// * check if claim date is within the validity date
+const isClaimDateValid = async (rewardId, claimDate) => {
+  try {
+    const reward = await rewardModel.findById(rewardId, "validFrom validUntil");
+
+    if (!reward) {
+      throw new Error("Reward not found");
+    }
+
+    claimDate = new Date(claimDate);
+    const claimDateOnly = new Date(claimDate.toISOString().split("T")[0]);
+    const validFromOnly = new Date(
+      reward.validFrom.toISOString().split("T")[0]
+    );
+    const validUntilOnly = new Date(
+      reward.validUntil.toISOString().split("T")[0]
+    );
+    return claimDateOnly >= validFromOnly && claimDateOnly <= validUntilOnly;
+  } catch (err) {
+    console.error("Error checking claim validity:", err);
+    throw err;
+  }
+};
+
 // * get stock available for a specific reward by ID
 const getStockAvailableForReward = async (rewardId) => {
   try {
@@ -62,8 +102,16 @@ const updateReward = async (req, res) => {
   const response = createResponse();
   try {
     // * destructure for easier access
-    const { rewardName, rewardDescription, pointsRequired, stocks, category } =
-      req.body;
+    const {
+      rewardName,
+      rewardDescription,
+      pointsRequired,
+      validFrom,
+      validUntil,
+      status,
+      stocks,
+      category,
+    } = req.body;
     const _id = req.params.id;
 
     console.log("req detected");
@@ -75,7 +123,10 @@ const updateReward = async (req, res) => {
       !rewardDescription ||
       !pointsRequired ||
       !stocks ||
-      !category
+      !category ||
+      !validFrom ||
+      !validUntil ||
+      !status
     ) {
       response.message = "Missing required fields!";
       return res.status(400).json(response);
@@ -88,6 +139,9 @@ const updateReward = async (req, res) => {
       pointsRequired: pointsRequired,
       stocks: stocks,
       category: category,
+      validFrom: validFrom,
+      validUntil: validUntil,
+      status: status,
     };
 
     // * checking for duplicate
@@ -159,7 +213,13 @@ const getAllRewards = async (req, res) => {
   const response = createResponse();
   try {
     // * for searching/filtering, check if the 'category' exists
-    const { category, rewardName } = req.query;
+    // * for pagination, default to 1 and limit to 3
+    const { page = 1, limit = 3, category, rewardName } = req.query;
+
+    // * converting page and limit to integer to avoid exceptions
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
     // * create filter obj dynamically based on the category
     let filter = {};
     if (category) {
@@ -169,12 +229,27 @@ const getAllRewards = async (req, res) => {
       // * partial and case-insensitive search on rewardName
       filter.rewardName = { $regex: rewardName, $options: "i" };
     }
-    let rewards = await rewardModel.find(filter);
+
+    let rewards = await rewardModel
+      .find(filter)
+      .limit(limitNumber * 1)
+      .skip((pageNumber - 1) * limitNumber)
+      .exec();
+
+    // * get total count of documents/row based on the filter
+    const totalCount = await rewardModel.countDocuments(filter);
+
+    // * calculate the total pages based on the set limit
+    const totalPages = Math.ceil(totalCount / limitNumber);
+
     response.message = category
       ? `Rewards in category '${category}' retrieved successfully!`
       : "All rewards retrieved successfully!";
     response.success = true;
     response.rewards = rewards;
+    response.totalPages = totalPages;
+    response.currentPage = pageNumber;
+
     return res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);
@@ -206,8 +281,16 @@ const addReward = async (req, res) => {
 
   try {
     // * destructure for easier access
-    const { rewardName, rewardDescription, pointsRequired, stocks, category } =
-      req.body;
+    const {
+      rewardName,
+      rewardDescription,
+      pointsRequired,
+      validFrom,
+      validUntil,
+      status,
+      stocks,
+      category,
+    } = req.body;
 
     console.log(req.file.filename);
     console.log(req.body);
@@ -218,7 +301,10 @@ const addReward = async (req, res) => {
       !rewardDescription ||
       !pointsRequired ||
       !stocks ||
-      !category
+      !category ||
+      !validFrom ||
+      !validUntil ||
+      !status
     ) {
       response.message = "Missing required fields!";
       return res.status(400).json(response);
@@ -254,6 +340,9 @@ const addReward = async (req, res) => {
       pointsRequired,
       stocks,
       category,
+      validFrom,
+      validUntil,
+      status,
     });
 
     response.message = "Reward successfully created!";
@@ -304,4 +393,6 @@ export {
   getPointsRequiredForReward,
   getStockAvailableForReward,
   updateRewardStocks,
+  getRewardStatus,
+  isClaimDateValid,
 };

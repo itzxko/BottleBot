@@ -56,7 +56,14 @@ const getAllUsers = async (req, res) => {
   const response = createResponse();
   try {
     // * for searching/filtering, check if the 'level' exists
-    const { level, userName } = req.query;
+    // * for pagination, default to 1 and limit to 3
+    const { page = 1, limit = 3, level, userName } = req.query;
+    console.log(`page ${page} and limit ${limit}`);
+
+    // * converting page and limit to integer to avoid exceptions
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
     // * create filter obj dynamically
     let filter = {};
     if (level) {
@@ -72,12 +79,26 @@ const getAllUsers = async (req, res) => {
       ];
     }
 
-    let users = await userModel.find(filter);
+    let users = await userModel
+      .find(filter)
+      .limit(limitNumber * 1)
+      .skip((pageNumber - 1) * limitNumber)
+      .exec();
+
+    // * get total count of documents/row based on the filter
+    const totalCount = await userModel.countDocuments(filter);
+
+    // * calculate the total pages based on the set limit
+    const totalPages = Math.ceil(totalCount / limitNumber);
+
     response.message = level
       ? `Users with level '${level}' retrieved successfully!`
       : "All users retrieved successfully!";
     response.success = true;
     response.users = users;
+    response.totalPages = totalPages;
+    response.currentPage = pageNumber;
+
     return res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);
@@ -132,26 +153,26 @@ const registerUser = async (req, res) => {
     }
 
     // * checking for duplicate
-    let isNameExists = await isNameAlreadyExists(personalInfo);
+    // let isNameExists = await isNameAlreadyExists(personalInfo);
 
-    if (isNameExists) {
-      response.message = "This name is already registered";
-      return res.json(response);
-    }
+    // if (isNameExists) {
+    //   response.message = "This name is already registered";
+    //   return res.json(response);
+    // }
 
-    let isNumberExists = await isNumberAlreadyInUse(contactInfo);
+    // let isNumberExists = await isNumberAlreadyInUse(contactInfo);
 
-    if (isNumberExists) {
-      response.message = "This number is already registered";
-      return res.json(response);
-    }
+    // if (isNumberExists) {
+    //   response.message = "This number is already registered";
+    //   return res.json(response);
+    // }
 
-    let isEmailExists = await isEmailAlreadyInUse(credentials);
+    // let isEmailExists = await isEmailAlreadyInUse(credentials);
 
-    if (isEmailExists) {
-      response.message = "Email is already in used";
-      return res.json(response);
-    }
+    // if (isEmailExists) {
+    //   response.message = "Email is already in used";
+    //   return res.json(response);
+    // }
 
     // * getting next id from the collection
     // const next = await getNextId();
