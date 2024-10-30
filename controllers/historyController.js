@@ -6,6 +6,8 @@ import {
   getPointsRequiredForReward,
   getStockAvailableForReward,
   updateRewardStocks,
+  getRewardStatus,
+  isClaimDateValid,
 } from "./rewardController.js";
 
 // TODO: include validation if the user exists
@@ -59,7 +61,13 @@ const getAllUsersDisposedBottleHistory = async (req, res) => {
   const response = createResponse();
   try {
     // * for filter
-    const { userName } = req.query;
+    // * for pagination, default to 1 and limit to 3
+    const { page = 1, limit = 3, userName } = req.query;
+
+    // * converting page and limit to integer to avoid exceptions
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
     // * create filter obj dynamically
     let filter = {};
     if (userName) {
@@ -84,36 +92,67 @@ const getAllUsersDisposedBottleHistory = async (req, res) => {
     }
 
     // * use aggregation to lookup user details and filter based on name
-    let allusersdisposalhistory = await bottleDisposalModel.aggregate([
-      {
-        $lookup: {
-          from: "users", // * match the collection name in MongoDB
-          localField: "userId",
-          foreignField: "_id",
-          as: "userInfo",
+    const [allusersdisposalhistory, totalCount] = await Promise.all([
+      bottleDisposalModel.aggregate([
+        {
+          $lookup: {
+            from: "users", // * match the collection name in MongoDB
+            localField: "userId",
+            foreignField: "_id",
+            as: "userInfo",
+          },
         },
-      },
-      {
-        $unwind: "$userInfo", // * unwind to treat the array as an object
-      },
-      {
-        $match: filter, // * filter based on the user name
-      },
-      {
-        $project: {
-          bottleCount: 1,
-          pointsAccumulated: 1,
-          dateDisposed: 1,
-          "userInfo.personalInfo.firstName": 1,
-          "userInfo.personalInfo.middleName": 1,
-          "userInfo.personalInfo.lastName": 1,
+        {
+          $unwind: "$userInfo", // * unwind to treat the array as an object
         },
-      },
+        {
+          $match: filter, // * filter based on the user name
+        },
+        { $skip: (pageNumber - 1) * limitNumber },
+        { $limit: limitNumber },
+        {
+          $project: {
+            bottleCount: 1,
+            pointsAccumulated: 1,
+            dateDisposed: 1,
+            "userInfo.personalInfo.firstName": 1,
+            "userInfo.personalInfo.middleName": 1,
+            "userInfo.personalInfo.lastName": 1,
+          },
+        },
+      ]),
+      bottleDisposalModel.aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userInfo",
+          },
+        },
+        {
+          $unwind: "$userInfo",
+        },
+        {
+          $match: filter,
+        },
+        { $count: "count" },
+      ]),
     ]);
+
+    // * get total count of documents/row based on the filter
+    const count = totalCount.length > 0 ? totalCount[0].count : 0;
+    console.log("totalCount", count);
+
+    // * calculate the total pages based on the set limit
+    const totalPages = Math.ceil(count / limitNumber);
 
     response.message = "all disposal record retrieved successfully!";
     response.success = true;
     response.allusersdisposalhistory = allusersdisposalhistory;
+    response.totalPages = totalPages;
+    response.currentPage = pageNumber;
+
     return res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);
@@ -126,13 +165,35 @@ const getAllUsersDisposedBottleHistory = async (req, res) => {
 const getOneUserDisposedBottleHistory = async (req, res) => {
   const response = createResponse();
   try {
+    // * for pagination, default to 1 and limit to 3
+    const { page = 1, limit = 3 } = req.query;
+    // * converting page and limit to integer to avoid exceptions
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
     const userid = req.params.userId;
-    let userdisposalhistory = await bottleDisposalModel.find({
+    let userdisposalhistory = await bottleDisposalModel
+      .find({
+        userId: userid,
+      })
+      .limit(limitNumber * 1)
+      .skip((pageNumber - 1) * limitNumber)
+      .exec();
+
+    // * get total count of documents/row based on the filter
+    const totalCount = await bottleDisposalModel.countDocuments({
       userId: userid,
     });
+
+    // * calculate the total pages based on the set limit
+    const totalPages = Math.ceil(totalCount / limitNumber);
+
     response.message = "user disposal record retrieved successfully!";
     response.success = true;
     response.userdisposalhistory = userdisposalhistory;
+    response.totalPages = totalPages;
+    response.currentPage = pageNumber;
+
     return res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);
@@ -328,7 +389,13 @@ const getAllUsersRewardClaimHistory = async (req, res) => {
   const response = createResponse();
   try {
     // * for filter
-    const { userName } = req.query;
+    // * for pagination, default to 1 and limit to 3
+    const { page = 1, limit = 3, userName } = req.query;
+
+    // * converting page and limit to integer to avoid exceptions
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
     // * create filter obj dynamically
     let filter = {};
     if (userName) {
@@ -351,37 +418,67 @@ const getAllUsersRewardClaimHistory = async (req, res) => {
         },
       ];
     }
-    let allusersrewardclaimhistory = await rewardClaimModel.aggregate([
-      {
-        $lookup: {
-          from: "users", // * match the collection name in MongoDB
-          localField: "userId",
-          foreignField: "_id",
-          as: "userInfo",
+
+    console.log("Filter:", filter);
+    console.log("Page:", pageNumber, "Limit:", limitNumber);
+
+    // * aggregate for counting and fetching
+    // * bc when filtering by username, counting documents return with filter is not
+    const [allusersrewardclaimhistory, totalCount] = await Promise.all([
+      rewardClaimModel.aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userInfo",
+          },
         },
-      },
-      {
-        $unwind: "$userInfo", // * unwind to treat the array as an object
-      },
-      {
-        $match: filter, // * filter based on the user name
-      },
-      {
-        $project: {
-          "userInfo.personalInfo.firstName": 1,
-          "userInfo.personalInfo.middleName": 1,
-          "userInfo.personalInfo.lastName": 1,
-          _id: 1,
-          userId: 1,
-          rewardId: 1,
-          pointsSpent: 1,
-          dateClaimed: 1,
+        { $unwind: "$userInfo" },
+        { $match: filter },
+        { $skip: (pageNumber - 1) * limitNumber },
+        { $limit: limitNumber },
+        {
+          $project: {
+            "userInfo.personalInfo.firstName": 1,
+            "userInfo.personalInfo.middleName": 1,
+            "userInfo.personalInfo.lastName": 1,
+            _id: 1,
+            userId: 1,
+            rewardId: 1,
+            pointsSpent: 1,
+            dateClaimed: 1,
+          },
         },
-      },
+      ]),
+      rewardClaimModel.aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userInfo",
+          },
+        },
+        { $unwind: "$userInfo" },
+        { $match: filter },
+        { $count: "count" },
+      ]),
     ]);
+
+    // * get total count of documents/row based on the filter
+    const count = totalCount.length > 0 ? totalCount[0].count : 0;
+    console.log("totalCount", count);
+
+    // * calculate the total pages based on the set limit
+    const totalPages = Math.ceil(count / limitNumber);
+
     response.message = "all reward claim record retrieved successfully!";
     response.success = true;
     response.allusersrewardclaimhistory = allusersrewardclaimhistory;
+    response.totalPages = totalPages;
+    response.currentPage = pageNumber;
+
     return res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);
@@ -394,13 +491,34 @@ const getAllUsersRewardClaimHistory = async (req, res) => {
 const getOneUserRewardClaimHistory = async (req, res) => {
   const response = createResponse();
   try {
+    // * for pagination, default to 1 and limit to 3
+    const { page = 1, limit = 3 } = req.query;
+    // * converting page and limit to integer to avoid exceptions
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
     const userId = req.params.userId;
-    let userrewardclaimhistory = await rewardClaimModel.find({
+    let userrewardclaimhistory = await rewardClaimModel
+      .find({
+        userId: userId,
+      })
+      .limit(limitNumber * 1)
+      .skip((pageNumber - 1) * limitNumber)
+      .exec();
+
+    // * get total count of documents/row based on the filter
+    const totalCount = await rewardClaimModel.countDocuments({
       userId: userId,
     });
+
+    // * calculate the total pages based on the set limit
+    const totalPages = Math.ceil(totalCount / limitNumber);
+
     response.message = "user reward claim record retrieved successfully!";
     response.success = true;
     response.userrewardclaimhistory = userrewardclaimhistory;
+    response.totalPages = totalPages;
+    response.currentPage = pageNumber;
     return res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);
@@ -420,6 +538,20 @@ const claimReward = async (req, res) => {
     if (!userId || !rewardId /*|| !pointsSpent*/) {
       response.message = "Missing required fields!";
       return res.status(400).json(response);
+    }
+
+    // * check if reward status is active and if the date claimed is within the validity date
+    let isRewardActive = (await getRewardStatus(rewardId)) === "active";
+    let validClaimDate = await isClaimDateValid(rewardId, Date.now());
+
+    if (!isRewardActive) {
+      response.message = "This reward is not yet active.";
+      return res.json(response);
+    }
+
+    if (!validClaimDate) {
+      response.message = "Only valid from a certain period.";
+      return res.json(response);
     }
 
     // * check if the current points of the user is sufficient to claim the reward

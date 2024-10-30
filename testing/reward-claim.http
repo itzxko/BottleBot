@@ -53,3 +53,11 @@ DELETE {{baseUrl}}/history/claim/all/66eda9be5bd1b94d69bddfcc
 
 ### * test route for getting one user current points
 GET {{baseUrl}}/history/claim/points/66ed98453aa56d8e612b209b
+
+### * test route for all users reward claim pagination
+GET {{baseUrl}}/history/claim?page=1&limit=1
+
+### * test route for all users reward claim pagination based on user name
+GET {{baseUrl}}/history/claim?userName=Citizen&page=1&limit=1
+### * test route for one user reward claim pagination
+GET {{baseUrl}}/history/claim/67164816e226d5fe58818645?page=1&limit=1

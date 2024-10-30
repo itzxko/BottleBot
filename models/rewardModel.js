@@ -27,6 +27,20 @@ const rewardSchema = new mongoose.Schema({
     enum: ["Goods", "Clothing", "Beverage", "Other"],
     required: true,
   },
+  validFrom: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
+  validUntil: {
+    type: Date,
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ["active", "inactive"],
+    default: "active",
+  },
 });
 
 export const rewardModel = mongoose.model("Rewards", rewardSchema);
