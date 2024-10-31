@@ -9,6 +9,10 @@ const bottleDisposalSchema = new mongoose.Schema({
   bottleCount: { type: Number, required: true },
   pointsAccumulated: { type: Number, required: true },
   dateDisposed: { type: Date, default: Date.now },
+  archiveDate: {
+    type: Date,
+    default: null,
+  },
 });
 
 export const bottleDisposalModel = mongoose.model("Disposal", bottleDisposalSchema);

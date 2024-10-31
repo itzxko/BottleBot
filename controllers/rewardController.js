@@ -108,7 +108,7 @@ const updateReward = async (req, res) => {
       pointsRequired,
       validFrom,
       validUntil,
-      status,
+      archiveDate,
       stocks,
       category,
     } = req.body;
@@ -125,8 +125,7 @@ const updateReward = async (req, res) => {
       !stocks ||
       !category ||
       !validFrom ||
-      !validUntil ||
-      !status
+      !validUntil
     ) {
       response.message = "Missing required fields!";
       return res.status(400).json(response);
@@ -134,15 +133,17 @@ const updateReward = async (req, res) => {
 
     let image = null;
     let updatedReward = {
-      rewardName: rewardName,
-      rewardDescription: rewardDescription,
-      pointsRequired: pointsRequired,
-      stocks: stocks,
-      category: category,
-      validFrom: validFrom,
-      validUntil: validUntil,
-      status: status,
+      rewardName,
+      rewardDescription,
+      pointsRequired,
+      stocks,
+      category,
+      validFrom,
+      validUntil,
+      archiveDate: archiveDate === undefined ? null : archiveDate,
     };
+
+    console.log("archive date:", archiveDate);
 
     // * checking for duplicate
     let isRewardExists = await isRewardAlreadyExists(rewardName, _id);
@@ -214,7 +215,7 @@ const getAllRewards = async (req, res) => {
   try {
     // * for searching/filtering, check if the 'category' exists
     // * for pagination, default to 1 and limit to 3
-    const { page = 1, limit = 3, category, rewardName } = req.query;
+    const { page = 1, limit = 3, category, rewardName, status } = req.query;
 
     // * converting page and limit to integer to avoid exceptions
     const pageNumber = parseInt(page, 10);
@@ -228,6 +229,12 @@ const getAllRewards = async (req, res) => {
     if (rewardName) {
       // * partial and case-insensitive search on rewardName
       filter.rewardName = { $regex: rewardName, $options: "i" };
+    }
+
+    if (status && status === "active") {
+      filter.archiveDate = null; // * only get rewards that has not been archived yet
+    } else if (status && status === "archived") {
+      filter.archiveDate = { $ne: null }; // * only get rewards that's already been archived
     }
 
     let rewards = await rewardModel
@@ -287,7 +294,6 @@ const addReward = async (req, res) => {
       pointsRequired,
       validFrom,
       validUntil,
-      status,
       stocks,
       category,
     } = req.body;
@@ -303,8 +309,7 @@ const addReward = async (req, res) => {
       !stocks ||
       !category ||
       !validFrom ||
-      !validUntil ||
-      !status
+      !validUntil
     ) {
       response.message = "Missing required fields!";
       return res.status(400).json(response);
@@ -342,7 +347,6 @@ const addReward = async (req, res) => {
       category,
       validFrom,
       validUntil,
-      status,
     });
 
     response.message = "Reward successfully created!";
@@ -360,22 +364,35 @@ const removeReward = async (req, res) => {
   const response = createResponse();
   try {
     const _id = req.params.id;
-    // * before deleting reward, delete all connected documents
-    const deletedRewardClaimHistory = await rewardClaimModel.deleteMany({
-      rewardId: _id,
+    // // * before deleting reward, delete all connected documents
+    // const deletedRewardClaimHistory = await rewardClaimModel.deleteMany({
+    //   rewardId: _id,
+    // });
+    // if (deletedRewardClaimHistory.deletedCount <= 0) {
+    //   console.log("No reward claim history to be deleted for this reward.");
+    // }
+    // const deletedReward = await rewardModel.findByIdAndDelete(_id);
+    // if (deletedReward) {
+    //   removeRewardImage(deletedReward.image);
+    //   response.message = "Reward successfuly deleted!";
+    //   response.success = true;
+    // } else {
+    //   response.message = "Reward does not exists!";
+    //   response.success = false;
+    // }
+
+    // * archive instead of delete
+    const archivedReward = await rewardModel.findByIdAndUpdate(_id, {
+      archiveDate: Date.now(),
     });
-    if (deletedRewardClaimHistory.deletedCount <= 0) {
-      console.log("No reward claim history to be deleted for this reward.");
-    }
-    const deletedReward = await rewardModel.findByIdAndDelete(_id);
-    if (deletedReward) {
-      removeRewardImage(deletedReward.image);
-      response.message = "Reward successfuly deleted!";
+    if (archivedReward) {
+      response.message = "Reward has been archived!";
       response.success = true;
     } else {
       response.message = "Reward does not exists!";
       response.success = false;
     }
+
     return res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);

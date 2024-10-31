@@ -93,7 +93,7 @@ GET {{baseUrl}}/users?page=1&limit=3
 ### * test route for pagination with a filter
 GET {{baseUrl}}/users?userName=User&page=1&limit=3
 
-### * LOGIC
+### * PAGINATION LOGIC
 ### * declare a var for currentPage
 ### * optionally, if you want to control the number of items to get 
 ### *   declare a var for limit
@@ -104,3 +104,55 @@ GET {{baseUrl}}/users?userName=User&page=1&limit=3
 ### *   just set the current page on that number (page = userClickedPage)
 ### * dont forget the validations (current page number >= 1) 
 ### *   and (currentpage number <= totalAvailablePages)
+
+### * FOR ARCHIVING !!!
+### * test route for getting all users that's been archived
+GET {{baseUrl}}/users?status=archived
+### * test route for getting all users that's still active
+GET {{baseUrl}}/users?status=active
+### * test route for getting all users (both active or archived)
+### * still the same on the prev way
+GET {{baseUrl}}/users?page=1
+### * test route to archive a user (still the same on prev like deleting it)
+DELETE {{baseUrl}}/users/6716478ae226d5fe5881863c
+### * test route to unarchive a user
+PUT {{baseUrl}}/users/6716478ae226d5fe5881863c
+Content-Type: application/json
+
+{
+  "archiveDate": null,
+  "personalInfo": {
+    "firstName": "John",
+    "middleName": "Doe",
+    "lastName": "Smith",
+    "dateOfBirth": "1990-01-01",
+    "gender": "Male",
+    "civilStatus": "Single",
+    "nationality": "Filipino"
+  },
+  "contactInfo": {
+    "address": {
+      "houseNumber": "123",
+      "street": "Main St",
+      "barangay": "Barangay 1",
+      "city": "City Name"
+    },
+    "phoneNumbers": ["09123456798"]
+  },
+  "economicInfo": {
+    "employmentStatus": "Employed",
+    "occupation": "Engineer"
+  },
+  "credentials": {
+    "email": "user@example.com",
+    "password": "yourpassword"
+  }
+}
+
+### * ARCHIVING LOGIC
+### * a filter button to see only active users, or only archived users, or also both
+### * no archiveDate in adding of user, 
+### *   archiveDate only triggers when remove button is clicked
+### * what if you want to unarchive or want to update the date that it is archived?
+### *   on the update page of the user, archiveDate is editable (date picker) ONLY IF archive date is not null 
+### *   pick a date to remain it as archived, remove the date or set to null to unarchive

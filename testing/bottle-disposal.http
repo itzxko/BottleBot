@@ -51,7 +51,7 @@ DELETE {{baseUrl}}/history/dispose/all/66ed98453aa56d8e612b209b
 ### * test route for getting one user total bottle dispose
 GET {{baseUrl}}/history/dispose/bottle/66ed98453aa56d8e612b209b
 
-
+# * PAGINATIONS
 ### * test route for all users bottle disposal pagination
 GET {{baseUrl}}/history/dispose?page=1&limit=1
 
@@ -60,3 +60,27 @@ GET {{baseUrl}}/history/dispose?userName=Staff&page=1&limit=1
 
 ### * test route for one user disposal history pagination
 GET {{baseUrl}}/history/dispose/67164816e226d5fe58818645?page=1&limit=1
+
+# * ARCHIVING
+### * archive 1 disposed bottle record, same route on deleting
+DELETE {{baseUrl}}/history/dispose/6723575916bbcb387402665b
+
+### * getting all users archived bottle disposal record only
+GET {{baseUrl}}/history/dispose?status=archived
+
+### * getting one user archived bottle disposal record only
+GET {{baseUrl}}/history/dispose/6723575916bbcb387402665b
+
+### * getting all users active bottle disposal record only
+GET {{baseUrl}}/history/dispose?status=active
+
+### * unarchive bottle disposal record
+PUT {{baseUrl}}/history/dispose/6723575916bbcb387402665b
+Content-Type: application/json
+
+{
+  "userId": "66ed98453aa56d8e612b209b",
+  "bottleCount": 3,
+  "pointsAccumulated": 3,
+  "archiveDate": null
+}

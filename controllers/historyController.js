@@ -62,7 +62,7 @@ const getAllUsersDisposedBottleHistory = async (req, res) => {
   try {
     // * for filter
     // * for pagination, default to 1 and limit to 3
-    const { page = 1, limit = 3, userName } = req.query;
+    const { page = 1, limit = 3, userName, status } = req.query;
 
     // * converting page and limit to integer to avoid exceptions
     const pageNumber = parseInt(page, 10);
@@ -91,6 +91,12 @@ const getAllUsersDisposedBottleHistory = async (req, res) => {
       ];
     }
 
+    if (status && status === "active") {
+      filter.archiveDate = null; // * only get records that has not been archived yet
+    } else if (status && status === "archived") {
+      filter.archiveDate = { $ne: null }; // * only get records that's already been archived
+    }
+
     // * use aggregation to lookup user details and filter based on name
     const [allusersdisposalhistory, totalCount] = await Promise.all([
       bottleDisposalModel.aggregate([
@@ -115,6 +121,7 @@ const getAllUsersDisposedBottleHistory = async (req, res) => {
             bottleCount: 1,
             pointsAccumulated: 1,
             dateDisposed: 1,
+            archiveDate: 1,
             "userInfo.personalInfo.firstName": 1,
             "userInfo.personalInfo.middleName": 1,
             "userInfo.personalInfo.lastName": 1,
@@ -161,29 +168,37 @@ const getAllUsersDisposedBottleHistory = async (req, res) => {
   }
 };
 
-// * get one disposal record
+// * get one user disposal record
 const getOneUserDisposedBottleHistory = async (req, res) => {
   const response = createResponse();
   try {
     // * for pagination, default to 1 and limit to 3
     const { page = 1, limit = 3 } = req.query;
+    const userId = req.params.userId;
     // * converting page and limit to integer to avoid exceptions
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
-    const userid = req.params.userId;
+    // let filter = {
+    //   userId,
+    // };
+
+    // if (status && status === "active") {
+    //   filter.archiveDate = null; // * only get records that has not been archived yet
+    // } else if (status && status === "archived") {
+    //   filter.archiveDate = { $ne: null }; // * only get records that's already been archived
+    // }
+
+    // console.log(filter);
+
     let userdisposalhistory = await bottleDisposalModel
-      .find({
-        userId: userid,
-      })
+      .find({ userId: "6723575916bbcb387402665b" })
       .limit(limitNumber * 1)
       .skip((pageNumber - 1) * limitNumber)
       .exec();
 
     // * get total count of documents/row based on the filter
-    const totalCount = await bottleDisposalModel.countDocuments({
-      userId: userid,
-    });
+    const totalCount = await bottleDisposalModel.countDocuments({ userId });
 
     // * calculate the total pages based on the set limit
     const totalPages = Math.ceil(totalCount / limitNumber);
@@ -243,7 +258,7 @@ const updateDisposedBottle = async (req, res) => {
   const response = createResponse();
   try {
     // * destructure for easier access
-    const { userId, bottleCount, pointsAccumulated } = req.body;
+    const { userId, bottleCount, pointsAccumulated, archiveDate } = req.body;
     const _id = req.params.id;
 
     console.log("req detected");
@@ -259,6 +274,7 @@ const updateDisposedBottle = async (req, res) => {
       userId,
       bottleCount,
       pointsAccumulated,
+      archiveDate,
     });
 
     response.message = "Disposed bottle record successfuly updated!";
@@ -276,16 +292,33 @@ const removeDisposedBottle = async (req, res) => {
   const response = createResponse();
   try {
     const _id = req.params.id;
-    const deletedDisposedBottle = await bottleDisposalModel.findByIdAndDelete(
-      _id
+    // const deletedDisposedBottle = await bottleDisposalModel.findByIdAndDelete(
+    //   _id
+    // );
+    // if (deletedDisposedBottle) {
+    //   response.message = "Disposed bottle record successfuly deleted!";
+    //   response.success = true;
+    // } else {
+    //   response.message = "Disposed bottle record does not exists!";
+    //   response.success = false;
+    // }
+
+    // * archive instead of delete
+    const archivedDisposedBottle = await bottleDisposalModel.findByIdAndUpdate(
+      _id,
+      {
+        archiveDate: Date.now(),
+      }
     );
-    if (deletedDisposedBottle) {
-      response.message = "Disposed bottle record successfuly deleted!";
+
+    if (archivedDisposedBottle) {
+      response.message = "Disposed bottle record has been archived!";
       response.success = true;
     } else {
       response.message = "Disposed bottle record does not exists!";
       response.success = false;
     }
+
     return res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);
