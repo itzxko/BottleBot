@@ -173,32 +173,30 @@ const getOneUserDisposedBottleHistory = async (req, res) => {
   const response = createResponse();
   try {
     // * for pagination, default to 1 and limit to 3
-    const { page = 1, limit = 3 } = req.query;
-    const userId = req.params.userId;
+    const { page = 1, limit = 3, status } = req.query;
+    const userId = new mongoose.Types.ObjectId(req.params.userId);
     // * converting page and limit to integer to avoid exceptions
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
-    // let filter = {
-    //   userId,
-    // };
-
-    // if (status && status === "active") {
-    //   filter.archiveDate = null; // * only get records that has not been archived yet
-    // } else if (status && status === "archived") {
-    //   filter.archiveDate = { $ne: null }; // * only get records that's already been archived
-    // }
-
-    // console.log(filter);
+    let filter = {
+      userId,
+    };
+    if (status && status === "active") {
+      filter.archiveDate = null; // * only get records that has not been archived yet
+    } else if (status && status === "archived") {
+      filter.archiveDate = { $ne: null }; // * only get records that's already been archived
+    }
+    console.log(filter);
 
     let userdisposalhistory = await bottleDisposalModel
-      .find({ userId: "6723575916bbcb387402665b" })
+      .find(filter)
       .limit(limitNumber * 1)
       .skip((pageNumber - 1) * limitNumber)
       .exec();
 
     // * get total count of documents/row based on the filter
-    const totalCount = await bottleDisposalModel.countDocuments({ userId });
+    const totalCount = await bottleDisposalModel.countDocuments(filter);
 
     // * calculate the total pages based on the set limit
     const totalPages = Math.ceil(totalCount / limitNumber);
@@ -423,7 +421,7 @@ const getAllUsersRewardClaimHistory = async (req, res) => {
   try {
     // * for filter
     // * for pagination, default to 1 and limit to 3
-    const { page = 1, limit = 3, userName } = req.query;
+    const { page = 1, limit = 3, userName, status } = req.query;
 
     // * converting page and limit to integer to avoid exceptions
     const pageNumber = parseInt(page, 10);
@@ -450,6 +448,12 @@ const getAllUsersRewardClaimHistory = async (req, res) => {
           "userInfo.personalInfo.lastName": { $regex: userName, $options: "i" },
         },
       ];
+    }
+
+    if (status && status === "active") {
+      filter.archiveDate = null; // * only get users that has not been archived yet
+    } else if (status && status === "archived") {
+      filter.archiveDate = { $ne: null }; // * only get users that's already been archived
     }
 
     console.log("Filter:", filter);
@@ -525,24 +529,30 @@ const getOneUserRewardClaimHistory = async (req, res) => {
   const response = createResponse();
   try {
     // * for pagination, default to 1 and limit to 3
-    const { page = 1, limit = 3 } = req.query;
+    const { page = 1, limit = 3, status } = req.query;
+    const userId = req.params.userId;
     // * converting page and limit to integer to avoid exceptions
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
-    const userId = req.params.userId;
+     let filter = {
+       userId,
+     };
+     if (status && status === "active") {
+       filter.archiveDate = null; // * only get records that has not been archived yet
+     } else if (status && status === "archived") {
+       filter.archiveDate = { $ne: null }; // * only get records that's already been archived
+     }
+     console.log(filter);
+
     let userrewardclaimhistory = await rewardClaimModel
-      .find({
-        userId: userId,
-      })
+      .find(filter)
       .limit(limitNumber * 1)
       .skip((pageNumber - 1) * limitNumber)
       .exec();
 
     // * get total count of documents/row based on the filter
-    const totalCount = await rewardClaimModel.countDocuments({
-      userId: userId,
-    });
+    const totalCount = await rewardClaimModel.countDocuments(filter);
 
     // * calculate the total pages based on the set limit
     const totalPages = Math.ceil(totalCount / limitNumber);
@@ -634,7 +644,7 @@ const updateRewardClaim = async (req, res) => {
   const response = createResponse();
   try {
     // * destructure for easier access
-    const { userId, rewardId, pointsSpent } = req.body;
+    const { userId, rewardId, pointsSpent, archiveDate } = req.body;
     const _id = req.params.id;
 
     // * validate the req body first before anything
@@ -648,6 +658,7 @@ const updateRewardClaim = async (req, res) => {
       userId,
       rewardId,
       pointsSpent,
+      archiveDate,
     });
 
     response.message = "Reward claim record successfuly updated!";
@@ -665,14 +676,30 @@ const removeRewardClaim = async (req, res) => {
   const response = createResponse();
   try {
     const _id = req.params.id;
-    const deletedRewardClaimed = await rewardClaimModel.findByIdAndDelete(_id);
-    if (deletedRewardClaimed) {
-      response.message = "Reward claim record successfuly deleted!";
+    // const deletedRewardClaimed = await rewardClaimModel.findByIdAndDelete(_id);
+    // if (deletedRewardClaimed) {
+    //   response.message = "Reward claim record successfuly deleted!";
+    //   response.success = true;
+    // } else {
+    //   response.message = "Reward claim record does not exists!";
+    //   response.success = false;
+    // }
+
+    // * archive instead of delete
+    const archivedRewardClaimed = await rewardClaimModel.findByIdAndUpdate(
+      _id,
+      {
+        archiveDate: Date.now(),
+      }
+    );
+    if (archivedRewardClaimed) {
+      response.message = "Reward claim record has been archived!";
       response.success = true;
     } else {
       response.message = "Reward claim record does not exists!";
       response.success = false;
     }
+
     return res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);
