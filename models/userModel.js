@@ -41,6 +41,10 @@ let userSchema = new mongoose.Schema({
       required: true,
     },
   },
+  archiveDate: {
+    type: Date,
+    default: null,
+  },
 });
 
 // * automatically creates a collection in the database

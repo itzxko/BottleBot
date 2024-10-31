@@ -41,6 +41,10 @@ const rewardSchema = new mongoose.Schema({
     enum: ["active", "inactive"],
     default: "active",
   },
+  archiveDate: {
+    type: Date,
+    default: null,
+  },
 });
 
 export const rewardModel = mongoose.model("Rewards", rewardSchema);

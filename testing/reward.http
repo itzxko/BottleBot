@@ -38,9 +38,24 @@ GET {{baseUrl}}/rewards?category=Beverage
 ### * test route for fitering rewards by name
 GET {{baseUrl}}/rewards?category=Beverage&rewardName=Kapepe
 
+
+### * PAGINATION
 ### * test route for reward pagination
 GET {{baseUrl}}/rewards?page=1&limit=1
 
 ### * test route for reward pagination with filter
-
 GET {{baseUrl}}/rewards?category=Goods&page=1&limit=1
+
+### * ARCHIVING (full example on samples folder of frontend)
+### * archive date field is not visible when adding reward
+### * only visible when archive date is not null and user is updating
+### * archiving a reward (same as deleting)
+DELETE {{baseUrl}}/rewards/6722646b1f7140f54a807700
+### * getting all rewards
+GET {{baseUrl}}/rewards
+
+### * only getting archived reward
+GET {{baseUrl}}/rewards?status=archived
+
+### * only getting active reward
+GET {{baseUrl}}/rewards?status=active

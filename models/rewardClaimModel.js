@@ -9,6 +9,10 @@ const rewardClaimSchema = new mongoose.Schema({
   },
   pointsSpent: { type: Number, required: true },
   dateClaimed: { type: Date, default: Date.now },
+  archiveDate: {
+    type: Date,
+    default: null,
+  },
 });
 
 export const rewardClaimModel = mongoose.model(

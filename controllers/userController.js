@@ -57,7 +57,7 @@ const getAllUsers = async (req, res) => {
   try {
     // * for searching/filtering, check if the 'level' exists
     // * for pagination, default to 1 and limit to 3
-    const { page = 1, limit = 3, level, userName } = req.query;
+    const { page = 1, limit = 3, level, userName, status } = req.query;
     console.log(`page ${page} and limit ${limit}`);
 
     // * converting page and limit to integer to avoid exceptions
@@ -78,6 +78,14 @@ const getAllUsers = async (req, res) => {
         { "personalInfo.lastName": { $regex: userName, $options: "i" } },
       ];
     }
+
+    if (status && status === "active") {
+      filter.archiveDate = null; // * only get users that has not been archived yet
+    } else if (status && status === "archived") {
+      filter.archiveDate = { $ne: null }; // * only get users that's already been archived
+    }
+
+    console.log(status);
 
     let users = await userModel
       .find(filter)
@@ -201,7 +209,7 @@ const updateUser = async (req, res) => {
   const response = createResponse();
   try {
     // * destructure for easier access
-    const { personalInfo, contactInfo, economicInfo, credentials } = req.body;
+    const { personalInfo, contactInfo, economicInfo, credentials, archiveDate } = req.body;
     const _id = req.params.id;
 
     // * validate the req body first before anything
@@ -252,6 +260,7 @@ const updateUser = async (req, res) => {
       contactInfo,
       economicInfo,
       credentials,
+      archiveDate,
     });
 
     response.message = "User successfuly updated!";
@@ -264,33 +273,48 @@ const updateUser = async (req, res) => {
   }
 };
 
-// * remove
+// * remove/archive
 const removeUser = async (req, res) => {
   const response = createResponse();
   try {
     const _id = req.params.id;
 
+    // ! IMPORTANT: instead of deleting, archive it
     // * before deleting user, delete all connected documents
-    const deletedRewardClaimHistory = await rewardClaimModel.deleteMany({
-      userId: _id,
+    // const deletedRewardClaimHistory = await rewardClaimModel.deleteMany({
+    //   userId: _id,
+    // });
+    // if (deletedRewardClaimHistory.deletedCount <= 0) {
+    //   console.log("No reward claim history to be deleted for this user.");
+    // }
+    // const deletedDisposalHistory = await bottleDisposalModel.deleteMany({
+    //   userId: _id,
+    // });
+    // if (deletedDisposalHistory.deletedCount <= 0) {
+    //   console.log("No disposal history to be deleted for this user.");
+    // }
+    // const deletedUser = await userModel.findByIdAndDelete(_id);
+    // if (deletedUser) {
+    //   response.message = "User successfuly deleted!";
+    //   response.success = true;
+    // } else {
+    //   response.message = "User does not exists!";
+    //   response.success = false;
+    // }
+
+    // * archiving user
+    const archivedUser = await userModel.findByIdAndUpdate(_id, {
+      archiveDate: Date.now(),
     });
-    if (deletedRewardClaimHistory.deletedCount <= 0) {
-      console.log("No reward claim history to be deleted for this user.");
-    }
-    const deletedDisposalHistory = await bottleDisposalModel.deleteMany({
-      userId: _id,
-    });
-    if (deletedDisposalHistory.deletedCount <= 0) {
-      console.log("No disposal history to be deleted for this user.");
-    }
-    const deletedUser = await userModel.findByIdAndDelete(_id);
-    if (deletedUser) {
-      response.message = "User successfuly deleted!";
+
+    if (archivedUser) {
+      response.message = "User has been archived!";
       response.success = true;
     } else {
       response.message = "User does not exists!";
       response.success = false;
     }
+
     return res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);
