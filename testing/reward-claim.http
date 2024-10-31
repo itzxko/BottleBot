@@ -29,7 +29,7 @@ Content-Type: application/json
 GET {{baseUrl}}/history/claim
 
 ### * test route for getting all users reward claim history based on user name
-GET {{baseUrl}}/history/claim?userName=Josh
+GET {{baseUrl}}/history/claim?userName=Citizen
 
 ### * test route for getting one user reward claim history
 GET {{baseUrl}}/history/claim/66ed98453aa56d8e612b209b
@@ -54,10 +54,40 @@ DELETE {{baseUrl}}/history/claim/all/66eda9be5bd1b94d69bddfcc
 ### * test route for getting one user current points
 GET {{baseUrl}}/history/claim/points/66ed98453aa56d8e612b209b
 
+
+### * PAGINATIONS
 ### * test route for all users reward claim pagination
 GET {{baseUrl}}/history/claim?page=1&limit=1
 
 ### * test route for all users reward claim pagination based on user name
 GET {{baseUrl}}/history/claim?userName=Citizen&page=1&limit=1
+
 ### * test route for one user reward claim pagination
 GET {{baseUrl}}/history/claim/67164816e226d5fe58818645?page=1&limit=1
+
+### * ARCHIVING
+### * archive 1 claim reward record, same route on deleting
+DELETE {{baseUrl}}/history/claim/67236805fe441291a9d33cda
+
+### * unarchive 1 claim reward record, same route on update
+PUT {{baseUrl}}/history/claim/67236805fe441291a9d33cda
+Content-Type: application/json
+
+{
+  "archiveDate": null,
+  "userId": "67164816e226d5fe58818645",
+  "rewardId": "67233d04bb0b9f13f8cd2a22",
+  "pointsSpent": 1
+}
+
+### * getting all users archived claim reward record only
+GET {{baseUrl}}/history/claim?status=archived
+
+### * getting one user archived claim reward record only
+GET {{baseUrl}}/history/claim/67164816e226d5fe58818645?status=archived
+
+### * getting all users active claim reward record only
+GET {{baseUrl}}/history/claim?status=active
+
+### * getting one user active claim reward record only
+GET {{baseUrl}}/history/claim/67164816e226d5fe58818645?status=active
