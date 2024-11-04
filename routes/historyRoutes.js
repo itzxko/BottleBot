@@ -14,6 +14,7 @@ import {
   removeUserRewardClaim,
   getUserBottleDisposalCount,
   getCurrentUserPointsAvailable,
+  getOneDisposedBottleHistory,
 } from "../controllers/historyController.js";
 const historyRoutes = express.Router();
 
@@ -34,7 +35,10 @@ historyRoutes.delete("/dispose/all/:userId", removeUserDisposedBottle);
 historyRoutes.get("/dispose", getAllUsersDisposedBottleHistory);
 
 // * get one user disposal history
-historyRoutes.get("/dispose/:userId", getOneUserDisposedBottleHistory);
+historyRoutes.get("/dispose/user/:userId", getOneUserDisposedBottleHistory);
+
+// * get one disposal history
+historyRoutes.get("/dispose/:id", getOneDisposedBottleHistory);
 
 // * get user's bottle count
 historyRoutes.get("/dispose/bottle/:userId", getUserBottleDisposalCount);

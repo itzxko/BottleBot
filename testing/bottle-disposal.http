@@ -29,8 +29,11 @@ GET {{baseUrl}}/history/dispose
 ### * test route for getting record of all users with name filter
 GET {{baseUrl}}/history/dispose?userName=Citizen&status=active
 
-### * test route for getting one user disposal history
-GET {{baseUrl}}/history/dispose/66ed98453aa56d8e612b209b
+### * test route for getting one disposal history using history id
+GET {{baseUrl}}/history/dispose/672721e108df0e130147862f
+
+### * test route for getting one user disposal history using user id
+GET {{baseUrl}}/history/dispose/user/67225a62ba9e3dea6540a422
 
 ### * test route for updating bottle disposal history
 PUT {{baseUrl}}/history/dispose/66f00533e85eb1c23ded9b2f

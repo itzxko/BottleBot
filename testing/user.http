@@ -11,7 +11,7 @@ GET {{baseUrl}}/users/66ed7df69271160de05cbd59
 
 
 ### * test route to filter user by level
-GET {{baseUrl}}/users?level=citizen
+GET {{baseUrl}}/users?level=citizen&limit=2&page=4
 
 ### * test route to filter user by name (first, middle, and last)
 # * (no filter for fullname or fname+mName or fname+lname)
