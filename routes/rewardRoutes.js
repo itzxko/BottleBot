@@ -1,6 +1,13 @@
 import multer from "multer";
 import express from "express";
-import { addReward, getAllRewards, getOneReward, updateReward, removeReward } from "../controllers/rewardController.js";
+import {
+  addReward,
+  getAllRewards,
+  getOneReward,
+  updateReward,
+  removeReward,
+} from "../controllers/rewardController.js";
+import { createResponse } from "../utils/response.js";
 
 const rewardRoutes = express.Router();
 
@@ -32,12 +39,22 @@ const upload = multer({
   },
 });
 
+// * Middleware to check if file is missing
+const checkFile = (req, res, next) => {
+  if (!req.file) {
+    let response = createResponse();
+    response.message = "Image upload failed or missing!";
+    return res.status(400).json(response);
+  }
+  next();
+};
+
 // ! file uploaded using REST client becomes corrupted
 // ? test on actual frontend input
-rewardRoutes.post("/", upload.single("image"), addReward);
+rewardRoutes.post("/", upload.single("image"), checkFile, addReward);
 
 // * update reward
-rewardRoutes.post("/:id", upload.single("image"), updateReward);
+rewardRoutes.post("/:id", upload.single("image"), checkFile, updateReward);
 
 // * remove reward
 rewardRoutes.delete("/:id", upload.single("image"), removeReward);

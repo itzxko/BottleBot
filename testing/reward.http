@@ -41,7 +41,7 @@ GET {{baseUrl}}/rewards?category=Beverage&rewardName=Kapepe
 
 ### * PAGINATION
 ### * test route for reward pagination
-GET {{baseUrl}}/rewards?page=1&limit=1
+GET {{baseUrl}}/rewards?page=2&limit=0
 
 ### * test route for reward pagination with filter
 GET {{baseUrl}}/rewards?category=Goods&page=1&limit=1

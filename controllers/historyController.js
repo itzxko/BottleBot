@@ -122,6 +122,7 @@ const getAllUsersDisposedBottleHistory = async (req, res) => {
             pointsAccumulated: 1,
             dateDisposed: 1,
             archiveDate: 1,
+            userId: 1,
             "userInfo.personalInfo.firstName": 1,
             "userInfo.personalInfo.middleName": 1,
             "userInfo.personalInfo.lastName": 1,
@@ -206,6 +207,25 @@ const getOneUserDisposedBottleHistory = async (req, res) => {
     response.userdisposalhistory = userdisposalhistory;
     response.totalPages = totalPages;
     response.currentPage = pageNumber;
+
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
+  }
+};
+
+// * get one user disposal record
+const getOneDisposedBottleHistory = async (req, res) => {
+  const response = createResponse();
+  try {
+    const _id = req.params.id;
+
+    let oneDisposalhistory = await bottleDisposalModel.findOne({ _id: _id });
+    response.message = "One disposal record retrieved successfully!";
+    response.success = true;
+    response.oneDisposalhistory = oneDisposalhistory;
 
     return res.json(response);
   } catch (error) {
@@ -535,15 +555,15 @@ const getOneUserRewardClaimHistory = async (req, res) => {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
-     let filter = {
-       userId,
-     };
-     if (status && status === "active") {
-       filter.archiveDate = null; // * only get records that has not been archived yet
-     } else if (status && status === "archived") {
-       filter.archiveDate = { $ne: null }; // * only get records that's already been archived
-     }
-     console.log(filter);
+    let filter = {
+      userId,
+    };
+    if (status && status === "active") {
+      filter.archiveDate = null; // * only get records that has not been archived yet
+    } else if (status && status === "archived") {
+      filter.archiveDate = { $ne: null }; // * only get records that's already been archived
+    }
+    console.log(filter);
 
     let userrewardclaimhistory = await rewardClaimModel
       .find(filter)
@@ -747,4 +767,5 @@ export {
   removeUserRewardClaim,
   getUserBottleDisposalCount,
   getCurrentUserPointsAvailable,
+  getOneDisposedBottleHistory,
 };
