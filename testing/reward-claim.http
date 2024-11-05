@@ -32,7 +32,10 @@ GET {{baseUrl}}/history/claim
 GET {{baseUrl}}/history/claim?userName=Citizen
 
 ### * test route for getting one user reward claim history
-GET {{baseUrl}}/history/claim/66ed98453aa56d8e612b209b
+GET {{baseUrl}}/history/claim/user/67225a62ba9e3dea6540a422
+
+### * test route for getting one unique reward claim history
+GET {{baseUrl}}/history/claim/672856ebb6889caba5bb832e
 
 ### * test route for updating reward claim history
 PUT {{baseUrl}}/history/claim/66ef1373265204a3d62c53d5
