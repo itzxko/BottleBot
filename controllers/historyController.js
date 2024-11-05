@@ -505,6 +505,7 @@ const getAllUsersRewardClaimHistory = async (req, res) => {
             rewardId: 1,
             pointsSpent: 1,
             dateClaimed: 1,
+            archiveDate: 1,
           },
         },
       ]),
@@ -544,7 +545,7 @@ const getAllUsersRewardClaimHistory = async (req, res) => {
   }
 };
 
-// * get one reward claim record
+// * get one user reward claim record
 const getOneUserRewardClaimHistory = async (req, res) => {
   const response = createResponse();
   try {
@@ -582,6 +583,23 @@ const getOneUserRewardClaimHistory = async (req, res) => {
     response.userrewardclaimhistory = userrewardclaimhistory;
     response.totalPages = totalPages;
     response.currentPage = pageNumber;
+    return res.json(response);
+  } catch (error) {
+    console.error("ERROR : ", error);
+    response.message = "Internal server error";
+    return res.status(500).json(response);
+  }
+};
+
+// * get one  reward claim record
+const getOneRewardClaimHistory = async (req, res) => {
+  const response = createResponse();
+  try {
+    const _id = req.params.id;
+    let rewardclaimhistory = await rewardClaimModel.find({ _id: _id });
+    response.message = "one reward claim record retrieved successfully!";
+    response.success = true;
+    response.rewardclaimhistory = rewardclaimhistory;
     return res.json(response);
   } catch (error) {
     console.error("ERROR : ", error);
@@ -768,4 +786,5 @@ export {
   getUserBottleDisposalCount,
   getCurrentUserPointsAvailable,
   getOneDisposedBottleHistory,
+  getOneRewardClaimHistory,
 };
