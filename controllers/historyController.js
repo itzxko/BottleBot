@@ -62,7 +62,14 @@ const getAllUsersDisposedBottleHistory = async (req, res) => {
   try {
     // * for filter
     // * for pagination, default to 1 and limit to 3
-    const { page = 1, limit = 3, userName, status } = req.query;
+    const {
+      page = 1,
+      limit = 3,
+      userName,
+      status,
+      startDate,
+      endDate,
+    } = req.query;
 
     // * converting page and limit to integer to avoid exceptions
     const pageNumber = parseInt(page, 10);
@@ -95,6 +102,13 @@ const getAllUsersDisposedBottleHistory = async (req, res) => {
       filter.archiveDate = null; // * only get records that has not been archived yet
     } else if (status && status === "archived") {
       filter.archiveDate = { $ne: null }; // * only get records that's already been archived
+    }
+
+    if (startDate && endDate) {
+      filter.dateDisposed = {
+        $gte: new Date(startDate),
+        $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
+      };
     }
 
     // * use aggregation to lookup user details and filter based on name
@@ -174,7 +188,7 @@ const getOneUserDisposedBottleHistory = async (req, res) => {
   const response = createResponse();
   try {
     // * for pagination, default to 1 and limit to 3
-    const { page = 1, limit = 3, status } = req.query;
+    const { page = 1, limit = 3, status, startDate, endDate } = req.query;
     const userId = new mongoose.Types.ObjectId(req.params.userId);
     // * converting page and limit to integer to avoid exceptions
     const pageNumber = parseInt(page, 10);
@@ -187,6 +201,13 @@ const getOneUserDisposedBottleHistory = async (req, res) => {
       filter.archiveDate = null; // * only get records that has not been archived yet
     } else if (status && status === "archived") {
       filter.archiveDate = { $ne: null }; // * only get records that's already been archived
+    }
+
+    if (startDate && endDate) {
+      filter.dateDisposed = {
+        $gte: new Date(startDate),
+        $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
+      };
     }
     console.log(filter);
 
@@ -216,7 +237,7 @@ const getOneUserDisposedBottleHistory = async (req, res) => {
   }
 };
 
-// * get one user disposal record
+// * get one disposal record
 const getOneDisposedBottleHistory = async (req, res) => {
   const response = createResponse();
   try {
@@ -441,7 +462,14 @@ const getAllUsersRewardClaimHistory = async (req, res) => {
   try {
     // * for filter
     // * for pagination, default to 1 and limit to 3
-    const { page = 1, limit = 3, userName, status } = req.query;
+    const {
+      page = 1,
+      limit = 3,
+      userName,
+      status,
+      startDate,
+      endDate,
+    } = req.query;
 
     // * converting page and limit to integer to avoid exceptions
     const pageNumber = parseInt(page, 10);
@@ -474,6 +502,13 @@ const getAllUsersRewardClaimHistory = async (req, res) => {
       filter.archiveDate = null; // * only get users that has not been archived yet
     } else if (status && status === "archived") {
       filter.archiveDate = { $ne: null }; // * only get users that's already been archived
+    }
+
+    if (startDate && endDate) {
+      filter.dateClaimed = {
+        $gte: new Date(startDate),
+        $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
+      };
     }
 
     console.log("Filter:", filter);
@@ -550,7 +585,7 @@ const getOneUserRewardClaimHistory = async (req, res) => {
   const response = createResponse();
   try {
     // * for pagination, default to 1 and limit to 3
-    const { page = 1, limit = 3, status } = req.query;
+    const { page = 1, limit = 3, status, startDate, endDate } = req.query;
     const userId = req.params.userId;
     // * converting page and limit to integer to avoid exceptions
     const pageNumber = parseInt(page, 10);
@@ -559,11 +594,20 @@ const getOneUserRewardClaimHistory = async (req, res) => {
     let filter = {
       userId,
     };
+
     if (status && status === "active") {
       filter.archiveDate = null; // * only get records that has not been archived yet
     } else if (status && status === "archived") {
       filter.archiveDate = { $ne: null }; // * only get records that's already been archived
     }
+
+    if (startDate && endDate) {
+      filter.dateClaimed = {
+        $gte: new Date(startDate),
+        $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
+      };
+    }
+
     console.log(filter);
 
     let userrewardclaimhistory = await rewardClaimModel
@@ -591,7 +635,7 @@ const getOneUserRewardClaimHistory = async (req, res) => {
   }
 };
 
-// * get one  reward claim record
+// * get one reward claim record
 const getOneRewardClaimHistory = async (req, res) => {
   const response = createResponse();
   try {

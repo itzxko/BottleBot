@@ -37,6 +37,12 @@ GET {{baseUrl}}/history/claim/user/67225a62ba9e3dea6540a422
 ### * test route for getting one unique reward claim history
 GET {{baseUrl}}/history/claim/672856ebb6889caba5bb832e
 
+### * test route for filtering all user reward claim records by date (start and end)
+GET {{baseUrl}}/history/claim?startDate=2024-11-04&endDate=2024-11-04&limit=20
+
+### * test route for filtering one user reward claim records by date (start and end)
+GET {{baseUrl}}/history/claim/user/67225a62ba9e3dea6540a422?startDate=2024-11-03&endDate=2024-11-06&limit=10
+
 ### * test route for updating reward claim history
 PUT {{baseUrl}}/history/claim/66ef1373265204a3d62c53d5
 Content-Type: application/json
