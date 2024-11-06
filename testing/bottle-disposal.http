@@ -35,6 +35,12 @@ GET {{baseUrl}}/history/dispose/672721e108df0e130147862f
 ### * test route for getting one user disposal history using user id
 GET {{baseUrl}}/history/dispose/user/67225a62ba9e3dea6540a422
 
+### * test route for filtering all user bottle records by date (start and end)
+GET {{baseUrl}}/history/dispose?startDate=2024-11-04&endDate=2024-11-04&limit=10
+
+### * test route for filtering one user disposal history by date (start and end)
+GET {{baseUrl}}/history/dispose/user/67225a62ba9e3dea6540a422?startDate=2024-11-02&endDate=2024-11-03&limit=10
+
 ### * test route for updating bottle disposal history
 PUT {{baseUrl}}/history/dispose/66f00533e85eb1c23ded9b2f
 Content-Type: application/json
