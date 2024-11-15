@@ -1,5 +1,7 @@
 import { bottleBotConfigModel } from "../models/bottleBotConfigModel.js";
 import { createResponse } from "../utils/response.js";
+import axios from "axios";
+import fs from "fs";
 
 // * check if the configs are already set
 const getBottleBotConfig = async () => {
@@ -33,7 +35,6 @@ const isBottleBotConfigSet = async (req, res) => {
 
   return res.json(response);
 };
-
 
 // * calculate equivalent points of one bottle based on weight
 const getEquivalentInPointsBasedOnWeight = async (req, res) => {
@@ -144,9 +145,58 @@ const updateBottleBotConfig = async (req, res) => {
   }
 };
 
+// ! SAMPLE ONLY, TO BE DELETED SOON
+const sendDetectionToRoboflow = async (req, res) => {
+  const response = createResponse();
+  try {
+    // Read image file and encode it in Base64
+    const image = fs.readFileSync(
+      "../BottleBot-Backend/testing/sample_images/plastic-bottle-2.png",
+      { encoding: "base64" }
+    );
+
+    // Send the image to the Roboflow API
+    const apiResponse = await axios({
+      method: "POST",
+      url: "https://detect.roboflow.com/bottle-bot-gpytx/2",
+      params: {
+        api_key: "BMVwYdYhZlNooeskV5Ls",
+      },
+      data: image,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+
+    // Handle successful response
+    console.log("Roboflow Response:", apiResponse.data);
+    response.success = true;
+    response.message = apiResponse.data;
+    return res.status(200).json(response);
+  } catch (error) {
+    // Handle Axios and other errors
+    if (error.response) {
+      // API responded with an error status code
+      console.error("API Error:", error.response.data);
+      response.message = error.response.data;
+    } else if (error.request) {
+      // No response received from the API
+      console.error("No Response from API:", error.request);
+      response.message = "No response from Roboflow API";
+    } else {
+      // Other errors
+      console.error("Error:", error.message);
+      response.message = "Internal server error";
+    }
+
+    return res.status(500).json(response);
+  }
+};
+
 export {
   setBottleBotConfig,
   updateBottleBotConfig,
   isBottleBotConfigSet,
   getEquivalentInPointsBasedOnWeight,
+  sendDetectionToRoboflow,
 };

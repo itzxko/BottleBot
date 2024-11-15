@@ -10,3 +10,35 @@ Content-Type: application/json
 {
   "value": 5
 }
+
+### * for overflow
+POST {{baseUrl}}/monitor
+Content-Type: application/json
+
+{
+  "overflowLevel": "10%"
+}
+
+### * for overflow
+POST {{baseUrl}}/monitor
+Content-Type: application/json
+
+{
+  "waterLevel": "0%"
+}
+
+### * for orientation
+POST {{baseUrl}}/monitor
+Content-Type: application/json
+
+{
+  "orientation": 1
+}
+
+### * if moving or not
+POST {{baseUrl}}/monitor
+Content-Type: application/json
+
+{
+  "traveling": true
+}
