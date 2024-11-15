@@ -4,6 +4,7 @@ import {
   isBottleBotConfigSet,
   setBottleBotConfig,
   updateBottleBotConfig,
+  sendDetectionToRoboflow,
 } from "../controllers/bottleBotConfigController.js";
 
 const bottleBotConfigRoutes = express.Router();
@@ -15,5 +16,8 @@ bottleBotConfigRoutes.get(
 );
 bottleBotConfigRoutes.post("/", setBottleBotConfig);
 bottleBotConfigRoutes.put("/:id", updateBottleBotConfig);
+
+// ! SAMPLE ONLY, TO BE DELETED SOON
+bottleBotConfigRoutes.get("/detect", sendDetectionToRoboflow);
 
 export default bottleBotConfigRoutes;

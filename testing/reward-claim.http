@@ -38,7 +38,7 @@ GET {{baseUrl}}/history/claim/user/67225a62ba9e3dea6540a422
 GET {{baseUrl}}/history/claim/672856ebb6889caba5bb832e
 
 ### * test route for filtering all user reward claim records by date (start and end)
-GET {{baseUrl}}/history/claim?startDate=2024-11-04&endDate=2024-11-04&limit=20
+GET {{baseUrl}}/history/claim?startDate=2024-11-04&endDate=2024-11-04&limit=20&userName=User 5
 
 ### * test route for filtering one user reward claim records by date (start and end)
 GET {{baseUrl}}/history/claim/user/67225a62ba9e3dea6540a422?startDate=2024-11-03&endDate=2024-11-06&limit=10

@@ -42,3 +42,7 @@ Content-Type: application/json
     "equivalentInPoints": 10
   }
 }
+
+
+### ! sample detection to roboflow
+GET {{baseUrl}}/configurations/detect
