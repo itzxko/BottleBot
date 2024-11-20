@@ -44,5 +44,5 @@ Content-Type: application/json
 }
 
 
-### ! sample detection to roboflow
+### ! sample detection using backend
 GET {{baseUrl}}/configurations/detect
