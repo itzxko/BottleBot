@@ -2,6 +2,8 @@ import { createResponse } from "../utils/response.js";
 import { bottleBotQueueModel } from "../models/bottleBotQueueModel.js";
 import { wss } from "../server.js";
 import WebSocket from "ws";
+import { bottleBotConfigModel } from "../models/bottleBotConfigModel.js";
+import { userModel } from "../models/userModel.js";
 
 // TODO: TEST TOM ON WEBSOCKET AND NODEMCU!!!!!!!!!!!!!!!!!!!
 
@@ -9,10 +11,23 @@ import WebSocket from "ws";
 const addToQueue = async (req, res) => {
   const response = createResponse();
   try {
-    console.log("ADDED TO QUEUE");
-
     // * destructure for easier access
-    const { userId, location } = req.body;
+    let { userId, location, returnToDefault } = req.body;
+    if (returnToDefault === "true") {
+      const config = await bottleBotConfigModel.findOne();
+      const superAdmin = await userModel.findOne({
+        "credentials.level": "admin",
+      });
+      location = config.defaultLocation;
+      userId = superAdmin._id;
+      // * delete all in queue
+      const deleteAllQueue = await bottleBotQueueModel.deleteMany({});
+      if (deleteAllQueue) {
+        console.log("ALL QUEUE DELETED!");
+      }
+    }
+
+    console.log("ADDED TO QUEUE");
 
     // * validate the req body first before anything
     if (!userId || !location) {

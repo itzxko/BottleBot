@@ -54,7 +54,8 @@ const checkFile = (req, res, next) => {
 rewardRoutes.post("/", upload.single("image"), checkFile, addReward);
 
 // * update reward
-rewardRoutes.post("/:id", upload.single("image"), checkFile, updateReward);
+// rewardRoutes.post("/:id", upload.single("image"), checkFile, updateReward);
+rewardRoutes.post("/:id", upload.single("image"), updateReward);
 
 // * remove reward
 rewardRoutes.delete("/:id", upload.single("image"), removeReward);

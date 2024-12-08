@@ -8,13 +8,7 @@ POST {{baseUrl}}/queue
 Content-Type: application/json
 
 {
-  "userId" : "67138360c8332cd6e74bb37b",
-  "location": {
-    "lon" : 4.0,
-    "lat" : 4.0,
-    "locationName" : "Dyan lang sa gedli :)"
-  },
-  "status" : "pending"
+  "returnToDefault" : "true"
 }
 
 ### * test2 request to queue for bot navigation
