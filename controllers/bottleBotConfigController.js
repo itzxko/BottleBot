@@ -336,4 +336,5 @@ export {
   isBottleBotConfigSet,
   getEquivalentInPointsBasedOnWeight,
   sendDetectionToPythonScript,
+  getBottleBotConfig,
 };

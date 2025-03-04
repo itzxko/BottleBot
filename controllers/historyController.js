@@ -9,6 +9,7 @@ import {
   getRewardStatus,
   isClaimDateValid,
 } from "./rewardController.js";
+import { getBottleBotConfig } from "./bottleBotConfigController.js";
 
 // TODO: include validation if the user exists
 // TODO: include stock checking before claiming reward
@@ -261,20 +262,28 @@ const disposeBottle = async (req, res) => {
   const response = createResponse();
   try {
     // * destructure for easier access
-    const { userId, bottleCount, pointsAccumulated } = req.body;
+    const { userId, bottleCount } = req.body;
 
     // * validate the req body first before anything
-    if (!userId || !bottleCount || !pointsAccumulated) {
+    if (!userId || !bottleCount) {
       response.message = "Missing required fields!";
       return res.status(400).json(response);
     }
 
+    const configurations = await getBottleBotConfig();
+    let pointsAccumulated = 0;
+    pointsAccumulated =
+      bottleCount * configurations.config.bottleExchange.equivalentInPoints;
+    console.log(pointsAccumulated);
+
     // * adding a new disposed bottle record in the disposal collection
-    await bottleDisposalModel.create({
+    const newRecord = await bottleDisposalModel.create({
       userId,
       bottleCount,
       pointsAccumulated,
     });
+
+    console.log(newRecord);
 
     // ? testing purposes only
     let count = await calculateUserBottleDisposalCount(userId);
@@ -284,9 +293,12 @@ const disposeBottle = async (req, res) => {
 
     response.message = "Bottle Disposal history successfully saved!";
     response.success = true;
+    response.transactId = newRecord._id;
+    response.pointsAccumulated = pointsAccumulated;
+
     return res.json(response);
   } catch (error) {
-    console.error("ERROR:", err);
+    console.error("ERROR:", error);
     response.message = "Internal server error";
     return res.status(500).json(response);
   }

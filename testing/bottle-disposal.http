@@ -9,7 +9,7 @@ Content-Type: application/json
 
 {
   "userId": "66fb133aff0811b349be131c",
-  "bottleCount": 1,
+  "bottleCount": 2,
   "pointsAccumulated": 2
 }
 

@@ -22,12 +22,12 @@ Content-Type: application/json
   "bottleExchange": {
     "baseWeight": 1,
     "baseUnit": "kg",
-    "equivalentInPoints": 16
+    "equivalentInPoints": 10
   }
 }
 
 ### * test route for updating configs
-PUT {{baseUrl}}/configurations/66eff479cb8dbe0f68da504f
+PUT {{baseUrl}}/configurations/676bd5c2591c3f2e889ccb79
 Content-Type: application/json
 
 {
@@ -37,7 +37,7 @@ Content-Type: application/json
     "lon": 120.99964483582916
   },
   "bottleExchange": {
-    "baseWeight": 20,
+    "baseWeight": 1,
     "baseUnit": "kg",
     "equivalentInPoints": 10
   }

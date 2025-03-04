@@ -16,10 +16,10 @@ POST {{baseUrl}}/queue
 Content-Type: application/json
 
 {
-  "userId" : "67138360c8332cd6e74bb37b",
+  "userId" : "67164816e226d5fe58818645",
   "location": {
-    "lon" : 3.0,
-    "lat" : 3.0,
+    "lon" : 120.9766973,
+    "lat" : 14.648316,
     "locationName" : "Dyan lang sa gedli :)"
   },
   "status" : "pending"
