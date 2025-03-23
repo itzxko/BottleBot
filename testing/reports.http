@@ -1,0 +1,29 @@
+@port = 8080
+@baseUrl = http://localhost:{{port}}/api
+
+### * test route for get total collected bottles
+GET {{baseUrl}}/reports/total-collected?startDate=2025-03-21&endDate=2025-03-23
+
+### * test route to get top 5 contributors of plastic bottles
+GET {{baseUrl}}/reports/top-contributors?startDate=2025-03-21&endDate=2025-03-23
+
+### * test route to get points accumulated for bottle disposal of all users (THIS IS FOR ALL USERS)
+GET {{baseUrl}}/reports/points-accumulated?startDate=2025-03-21&endDate=2025-03-23
+
+### * test route to get overall total of transactions for claiming
+GET {{baseUrl}}/reports/total-claimed?startDate=2025-03-21&endDate=2025-03-24
+
+### * test route to get top 5 most redeemed reward (rewardId and # of times it was claimed) 
+GET {{baseUrl}}/reports/most-redeemed?startDate=2025-01-01&endDate=2025-03-24
+
+### * test route to get top 5 users that spent their points on the reward (NO ID MEANS IT IS NON MOBILE)
+GET {{baseUrl}}/reports/highest-points-spent?startDate=2025-01-01&endDate=2025-03-23
+
+### * test route to get current state of stocks of rewards
+GET {{baseUrl}}/reports/stock-report
+
+### * test route to get user count based on gender
+GET {{baseUrl}}/reports/demographics
+
+### * test route to get user count based on user level
+GET {{baseUrl}}/reports/account-summary

@@ -58,7 +58,7 @@ rewardRoutes.post("/", upload.single("image"), checkFile, addReward);
 rewardRoutes.post("/:id", upload.single("image"), updateReward);
 
 // * remove reward
-rewardRoutes.delete("/:id", upload.single("image"), removeReward);
+rewardRoutes.delete("/:id", removeReward);
 
 // * get all rewards
 rewardRoutes.get("/", getAllRewards);

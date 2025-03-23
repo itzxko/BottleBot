@@ -8,9 +8,9 @@ POST {{baseUrl}}/history/dispose
 Content-Type: application/json
 
 {
-  "userId": "66fb133aff0811b349be131c",
-  "bottleCount": 2,
-  "pointsAccumulated": 2
+  "userId": "67164816e226d5fe58818645",
+  "bottleCount": 10,
+  "pointsAccumulated": 100
 }
 
 ### * test route 2 for adding bottle disposal history
