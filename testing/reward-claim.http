@@ -8,8 +8,8 @@ POST {{baseUrl}}/history/claim
 Content-Type: application/json
 
 {
-  "userId": "66fb133aff0811b349be131c",
-  "rewardId": "66f6e76bc6fa1bb4916d67e8"
+  "userId": "67164816e226d5fe58818645",
+  "rewardId": "6789e749d89337e6f96d488e"
 }
 
 # "pointsSpent": 1
