@@ -1,5 +1,5 @@
 @port = 8080
-@baseUrl = http://localhost:{{port}}/api
+@baseUrl = https://bottlebot.onrender.com/api
 
 ### * test route for get total collected bottles
 GET {{baseUrl}}/reports/total-collected?startDate=2025-03-21&endDate=2025-03-23

@@ -23,9 +23,9 @@ Content-Type: application/json
 
 {
   "personalInfo": {
-    "firstName": "Jiwo",
-    "middleName": "G",
-    "lastName": "Mendador",
+    "firstName": "ADMIN",
+    "middleName": "ADMIN",
+    "lastName": "ADMIN",
     "dateOfBirth": "1990-01-01",
     "gender": "Male",
     "civilStatus": "Single",
@@ -45,8 +45,8 @@ Content-Type: application/json
     "occupation": "Engineer"
   },
   "credentials": {
-    "email": "user3@example.com",
-    "password": "yourpassword3"
+    "email": "adminloc.com",
+    "password": "adminloc"
   }
 }
 

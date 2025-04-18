@@ -14,6 +14,27 @@ import { createResponse } from "./utils/response.js";
 import bottleBotQueueRoutes from "./routes/bottleBotQueueRoutes.js";
 import reportsRoutes from "./controllers/reportsRoutesController.js";
 
+import admin from "firebase-admin";
+import fs from "fs";
+
+const serviceAccount = JSON.parse(
+  fs.readFileSync(
+    "bottlebot-d41cd-firebase-adminsdk-fbsvc-bdd7e7e0a9.json",
+    "utf8"
+  )
+);
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+const getAccessToken = async () => {
+  const token = await admin.credential.cert(serviceAccount).getAccessToken();
+  console.log("FCM Access Token:", token.access_token);
+};
+
+getAccessToken();
+
 let app = express();
 const PORT = 8080;
 const server = app.listen(PORT);

@@ -1,7 +1,7 @@
 # ! FOR SUCCESSFUL TESTING, IF PORT HAS BEEN CHANGED, 
 # ! MAKE SURE TO MODIFY PORTS ON OTHER TESTING FILE
 @port = 8080
-@baseUrl = http://localhost:{{port}}/api
+@baseUrl = https://bottlebot.onrender.com/api
 
 ### * test route to send value of led to monitor
 POST {{baseUrl}}/monitor
@@ -16,7 +16,7 @@ POST {{baseUrl}}/monitor
 Content-Type: application/json
 
 {
-  "overflowLevel": "10%"
+  "overflowLevel": "90"
 }
 
 ### * for overflow
@@ -24,7 +24,7 @@ POST {{baseUrl}}/monitor
 Content-Type: application/json
 
 {
-  "waterLevel": "0%"
+  "batteryLevel": "30"
 }
 
 ### * for orientation
@@ -32,7 +32,12 @@ POST {{baseUrl}}/monitor
 Content-Type: application/json
 
 {
-  "orientation": 1
+  "orientation": "0",
+  "waterLevel": "90",
+  "overflowLevel": "10",
+  "batteryLevel": "100",
+  "arrived": "true",
+  "arrivedAt": "6755a3b9fdc887113268ca12"
 }
 
 ### * if moving or not

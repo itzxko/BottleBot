@@ -27,6 +27,17 @@ const addToQueue = async (req, res) => {
       }
     }
 
+    let isUserAlreadyInQueue = await bottleBotQueueModel.find({
+      userId: userId,
+    });
+
+    console.log(isUserAlreadyInQueue);
+
+    if (isUserAlreadyInQueue.length > 0) {
+      response.message = "User Already in Queue!";
+      return res.status(400).json(response);
+    }
+
     console.log("ADDED TO QUEUE");
 
     // * validate the req body first before anything

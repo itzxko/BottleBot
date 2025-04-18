@@ -1,7 +1,8 @@
 # ! FOR SUCCESSFUL TESTING, IF PORT HAS BEEN CHANGED, 
 # ! MAKE SURE TO MODIFY PORTS ON OTHER TESTING FILE
 @port = 8080
-@baseUrl = http://localhost:{{port}}/api
+# @baseUrl = https://bottlebot.onrender.com/api
+@baseUrl = http://localhost:8080/api
 
 ### * test1 request to queue for bot navigation
 POST {{baseUrl}}/queue
@@ -16,7 +17,7 @@ POST {{baseUrl}}/queue
 Content-Type: application/json
 
 {
-  "userId" : "67164816e226d5fe58818645",
+  "userId" : "67225a62ba9e3dea6540a422",
   "location": {
     "lon" : 120.9766973,
     "lat" : 14.648316,
@@ -27,4 +28,4 @@ Content-Type: application/json
 
 ### * test request to remove location queue for finished navigation
 # * NOTE U NEED THE QUEUE ID HERE NOT USER ID
-DELETE {{baseUrl}}/queue/66fed3c373a269ad64fd9c56
+DELETE {{baseUrl}}/queue/67e560ac18c9532651512d72
